@@ -3,9 +3,10 @@
 Bu depo, seçilen fiziksel özelliklere göre yapay insan görselleri üretmeye yönelik ürün fikrinin statik bir demo arayüzünü içerir. Demo, gerçek model çalıştırmaz; yerine sentetik placeholder görseller ve örnek API yanıtı gösterir.
 
 ## Başlarken
-1. Depo klasöründe bir statik sunucu başlatın (örn. `python -m http.server 8000`).
-2. Tarayıcıdan `http://localhost:8000` adresini açın.
-3. Özellikleri seçip **Oluştur** butonuna basın veya **Rastgele Karıştır** ile hızlı denemeler yapın.
+1. Node 18+ yüklü olduğundan emin olun.
+2. Depo klasöründe `npm start` komutunu çalıştırın (yerleşik statik sunucu `http://localhost:8000` adresinde açılır).
+3. Tarayıcıdan `http://localhost:8000` adresini açın.
+4. Özellikleri seçip **Oluştur** butonuna basın veya **Rastgele Karıştır** ile hızlı denemeler yapın.
 
 ## Özellikler
 - Saç rengi, ten tonu (Fitzpatrick), cinsiyet seçeneği, boy, yaş aralığı, giyim stili (çoklu), poz ve arka plan dahil kontrollü vocab listeleri.

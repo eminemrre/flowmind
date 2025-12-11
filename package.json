@@ -1,0 +1,10 @@
+{
+  "name": "yeniproje-demo",
+  "version": "1.0.0",
+  "description": "Statik yapay görsel oluşturucu demo sunucusu",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "license": "MIT"
+}
