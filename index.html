@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Yapay İnsan Görüntüsü Oluşturucu (Demo)</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="hero">
+    <div class="hero__text">
+      <p class="badge">SYNTHETIC ONLY</p>
+      <h1>Yapay olarak üretilen fotogerçekçi insan görselleri</h1>
+      <p class="lead">Seçtiğiniz özelliklere göre rastgele, gerçek kişi olmayan örnek görseller üretin. Bu demo gerçek üretim modeli içermez; güvenli bir prototip akışı sunar.</p>
+      <p class="disclaimer">Bu resim yapay olarak üretilmiştir; gerçek bir kişiyi temsil etmez.</p>
+      <div class="cta-row">
+        <a class="button primary" href="#form">Hemen Başla</a>
+        <button class="button ghost" type="button" id="shuffleTop">Rastgele Karıştır</button>
+      </div>
+    </div>
+    <div class="hero__mock">
+      <canvas id="previewHero" width="420" height="420" aria-label="Örnek yapay görsel"></canvas>
+      <div class="watermark">SYNTHETIC / ÜRETİLMİŞ</div>
+    </div>
+  </header>
+
+  <main>
+    <section id="form" class="panel">
+      <div class="panel__header">
+        <div>
+          <p class="overline">Özellik Seçimi</p>
+          <h2>Fiziksel özellikleri seçin</h2>
+          <p class="muted">Tüm alanlar isteğe bağlıdır. İki değerli çoklu seçimlerde en fazla 2 değer girilebilir.</p>
+        </div>
+        <div class="panel__actions">
+          <button class="button ghost" type="button" id="resetBtn">Filtreleri Sıfırla</button>
+          <button class="button primary" type="button" id="shuffleBtn">Rastgele Karıştır</button>
+        </div>
+      </div>
+      <form id="attributesForm" class="grid">
+        <label class="field">
+          <span>Saç Rengi</span>
+          <select name="hair_color">
+            <option value="">—</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Ten Tonu (Fitzpatrick)</span>
+          <select name="skin_tone">
+            <option value="">—</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Boy Kategorisi</span>
+          <select name="height_cat">
+            <option value="">—</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Yaş Aralığı</span>
+          <select name="age_bucket">
+            <option value="">—</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Cinsiyet Opsiyonu</span>
+          <select name="gender">
+            <option value="">—</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Vücut Yapısı</span>
+          <select name="body_type">
+            <option value="">—</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Ayakkabı Numarası</span>
+          <select name="shoe_size_range">
+            <option value="">—</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Giyim Stili</span>
+          <select name="clothing_style" multiple size="4" aria-description="En fazla iki değer seçin">
+          </select>
+          <small class="muted">Çoklu seçim: maksimum 2</small>
+        </label>
+        <label class="field">
+          <span>Poz</span>
+          <select name="pose">
+            <option value="">—</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Arka Plan</span>
+          <select name="background">
+            <option value="">—</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Seed (opsiyonel)</span>
+          <input type="number" name="seed" placeholder="Rastgele için boş bırakın" />
+        </label>
+        <label class="field">
+          <span>Çıktı Boyutu</span>
+          <select name="size">
+            <option value="512x512">512x512</option>
+            <option value="768x768">768x768</option>
+            <option value="1024x1024">1024x1024</option>
+          </select>
+        </label>
+        <div class="field full">
+          <div class="consent">
+            <input type="checkbox" id="consent" required />
+            <label for="consent">Devam ederek yapay görsellerin üretileceğini ve gerçek kişileri temsil etmediğini kabul ediyorum.</label>
+          </div>
+        </div>
+        <div class="field full actions">
+          <button class="button primary" type="submit">Oluştur</button>
+          <button class="button secondary" type="button" id="shuffleSecondary">Tekrar Oluştur</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel" id="results">
+      <div class="panel__header">
+        <div>
+          <p class="overline">Sonuç</p>
+          <h2>Önizleme ve meta veriler</h2>
+          <p class="muted">Bu demo model çıktısı yerine yerleşik bir sentetik placeholder üretir. Gerçek kişi fotoğrafı yoktur.</p>
+        </div>
+      </div>
+      <div class="result">
+        <div class="result__image">
+          <canvas id="preview" width="512" height="512" role="img" aria-label="Üretilmiş görsel"></canvas>
+          <div class="watermark watermark--result">SYNTHETIC / ÜRETİLMİŞ</div>
+          <div class="chips" id="chips"></div>
+          <div class="result__buttons">
+            <button class="button primary" type="button" id="downloadBtn">İndir (PNG)</button>
+            <button class="button ghost" type="button" id="copyJson">API Yanıtını Kopyala</button>
+          </div>
+        </div>
+        <div class="result__meta">
+          <h3>Mock API Yanıtı</h3>
+          <pre id="responseBox" aria-live="polite"></pre>
+          <div class="alert">Bu resim yapay olarak üretilmiştir; gerçek bir kişiyi temsil etmez.</div>
+          <div class="alert secondary">Güvenlik filtresi gereksinimleri: ünlü, özel kişi veya yasaklı içerik promptları reddedilir.</div>
+          <div class="smallprint">Sunucu tarafı doğrulama: whitelist kontrolleri, 13 yaş altı üretim yok, maksimum 2 giyim stili.</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Demo amaçlıdır. Gerçek kişi fotoğrafları üretilmez veya yüklenmez. Kullanım politikalarını ihlal eden senaryolar engellenir.</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
