@@ -4,7 +4,7 @@ export const config = {
     openrouter: {
         apiKey: process.env.EXPO_PUBLIC_OPENROUTER_API_KEY || '',
         baseUrl: 'https://openrouter.ai/api/v1',
-        model: 'meta-llama/llama-3.2-3b-instruct:free', // Free model
+        model: 'google/gemma-3-4b-it:free', // Free model - tested
     },
 
     // VDS Backend
