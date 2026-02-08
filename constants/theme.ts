@@ -34,6 +34,8 @@ export const theme = {
         // Background
         background: '#FFFFFF',
         backgroundDark: '#0F172A',
+        surface: '#F9FAFB',
+        border: '#E5E7EB',
 
         // Text
         text: '#111827',

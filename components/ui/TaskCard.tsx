@@ -8,6 +8,7 @@ interface TaskCardProps {
     task: Task;
     onPress?: () => void;
     onComplete?: () => void;
+    onDelete?: () => void;
     style?: ViewStyle;
 }
 
@@ -30,7 +31,7 @@ const energyColors: Record<EnergyLevel, string> = {
     high: theme.colors.energy5,
 };
 
-export function TaskCard({ task, onPress, onComplete, style }: TaskCardProps) {
+export function TaskCard({ task, onPress, onComplete, onDelete, style }: TaskCardProps) {
     return (
         <TouchableOpacity
             style={[styles.container, style]}
