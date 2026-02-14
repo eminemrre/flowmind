@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { View, StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ThemeProvider, useTheme } from '@/components/ThemeProvider';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 function AppContent() {
     const { theme, isDark } = useTheme();
@@ -44,11 +45,13 @@ function AppContent() {
 
 export default function RootLayout() {
     return (
-        <GestureHandlerRootView style={{ flex: 1 }}>
-            <ThemeProvider>
-                <AppContent />
-            </ThemeProvider>
-        </GestureHandlerRootView>
+        <ErrorBoundary>
+            <GestureHandlerRootView style={{ flex: 1 }}>
+                <ThemeProvider>
+                    <AppContent />
+                </ThemeProvider>
+            </GestureHandlerRootView>
+        </ErrorBoundary>
     );
 }
 
