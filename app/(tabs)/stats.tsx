@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, SafeAreaView, ActivityIndicator, RefreshControl, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, SafeAreaView, ActivityIndicator, RefreshControl, TouchableOpacity, Alert, Dimensions } from 'react-native';
 import { Theme } from '@/constants/theme';
 import { useAuthStore } from '@/stores/authStore';
 import { useGamificationStore, ACHIEVEMENT_INFO } from '@/stores/gamificationStore';
 import { apiClient } from '@/lib/api';
 import { useThemedStyles } from '@/hooks/useThemedStyles';
 import { useTheme } from '@/components/ThemeProvider';
+import { BarChart } from 'react-native-chart-kit';
 
 interface StatsData {
     tasksCompleted: number;
@@ -146,6 +147,41 @@ export default function StatsScreen() {
                                     <Text style={styles.statLabel}>🔥 Streak</Text>
                                 </View>
                             </View>
+                        </View>
+
+                        {/* Performans Grafiği */}
+                        <View style={styles.card}>
+                            <Text style={styles.cardTitle}>📊 Performans</Text>
+                            <BarChart
+                                data={{
+                                    labels: ['Görev', 'Odak(s)', 'Streak', 'XP/10'],
+                                    datasets: [{
+                                        data: [
+                                            stats?.tasksCompleted || 0,
+                                            focusHours,
+                                            stats?.streak || 0,
+                                            ((stats?.xpEarned || 0) / 10),
+                                        ],
+                                    }],
+                                }}
+                                width={Dimensions.get('window').width - 64}
+                                height={200}
+                                yAxisLabel=""
+                                yAxisSuffix=""
+                                fromZero
+                                chartConfig={{
+                                    backgroundColor: theme.colors.card,
+                                    backgroundGradientFrom: theme.colors.card,
+                                    backgroundGradientTo: theme.colors.card,
+                                    decimalPlaces: 0,
+                                    color: (opacity = 1) => `rgba(99, 102, 241, ${opacity})`,
+                                    labelColor: () => theme.colors.textSecondary,
+                                    barPercentage: 0.6,
+                                    propsForLabels: { fontSize: 11 },
+                                }}
+                                style={{ borderRadius: 12, marginTop: 8 }}
+                                showValuesOnTopOfBars
+                            />
                         </View>
 
                         {/* Seviye İlerlemesi */}

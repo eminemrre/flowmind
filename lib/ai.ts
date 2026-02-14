@@ -1,5 +1,6 @@
 import { config } from '@/constants/config';
 import { Task, DailyPlan, TimeBlock } from '@/types';
+import { aiCache } from '@/lib/aiCache';
 
 interface ChatMessage {
     role: 'system' | 'user' | 'assistant';
@@ -71,6 +72,11 @@ class AIService {
         energyLevel: number,
         currentHour: number
     ): Promise<string> {
+        // Cache kontrolü (15 dk TTL)
+        const cacheKey = aiCache.makeKey('daily', energyLevel, currentHour, tasks.length);
+        const cached = await aiCache.get<string>(cacheKey);
+        if (cached) return cached;
+
         const taskList = tasks
             .filter(t => !t.isCompleted)
             .map(t => `- ${t.title} (${t.priority} öncelik, ${t.energyLevel} enerji, ${t.estimatedMinutes}dk)`)
@@ -93,7 +99,9 @@ Bugün nasıl verimli olabilirim?`,
             },
         ];
 
-        return this.chat(messages);
+        const result = await this.chat(messages);
+        await aiCache.set(cacheKey, result, 15 * 60 * 1000); // 15 dk cache
+        return result;
     }
 
     // ============ HAFTALIK RAPOR ============
@@ -103,6 +111,11 @@ Bugün nasıl verimli olabilirim?`,
         streak: number;
         totalXp: number;
     }): Promise<string> {
+        // Cache kontrolü (1 saat TTL)
+        const cacheKey = aiCache.makeKey('weekly', stats.tasksCompleted, stats.focusMinutes, stats.streak);
+        const cached = await aiCache.get<string>(cacheKey);
+        if (cached) return cached;
+
         const messages: ChatMessage[] = [
             {
                 role: 'system',
@@ -122,7 +135,9 @@ Performansımı değerlendir ve öneri ver.`,
             },
         ];
 
-        return this.chat(messages);
+        const result = await this.chat(messages);
+        await aiCache.set(cacheKey, result, 60 * 60 * 1000); // 1 saat cache
+        return result;
     }
 
     // ============ GÖREV ANALİZİ ============
