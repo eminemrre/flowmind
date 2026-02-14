@@ -46,6 +46,9 @@ const mapBackendTask = (raw: any): Task => ({
     completedAt: raw.completed_at || null,
     createdAt: raw.created_at || new Date().toISOString(),
     updatedAt: raw.updated_at || new Date().toISOString(),
+    recurrence: raw.recurrence || null,
+    recurrenceEndDate: raw.recurrence_end_date || null,
+    parentTaskId: raw.parent_task_id || null,
 });
 
 // Frontend camelCase → backend snake_case for updates

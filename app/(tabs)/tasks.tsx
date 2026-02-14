@@ -22,6 +22,7 @@ import { useTaskStore } from '@/stores/taskStore';
 import { useTheme } from '@/components/ThemeProvider';
 import { useThemedStyles } from '@/hooks/useThemedStyles';
 import { Theme } from '@/constants/theme';
+import { VoiceTaskButton } from '@/components/VoiceTaskButton';
 
 export default function TasksScreen() {
     const {
@@ -241,13 +242,15 @@ export default function TasksScreen() {
                 mode={modalMode}
             />
 
-            {/* Delete Confirm Modal */}
             <DeleteConfirmModal
                 visible={isDeleteModalVisible}
                 onClose={() => setDeleteModalVisible(false)}
                 onConfirm={handleConfirmDelete}
                 taskTitle={selectedTask?.title || ''}
             />
+
+            {/* Voice Task FAB */}
+            <VoiceTaskButton />
         </SafeAreaView>
     );
 }

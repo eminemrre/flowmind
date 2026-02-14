@@ -74,6 +74,16 @@ export default function TabLayout() {
                 }}
             />
             <Tabs.Screen
+                name="calendar"
+                options={{
+                    title: 'Takvim',
+                    headerTitle: '📅 Takvim',
+                    tabBarIcon: ({ color, size }) => (
+                        <Ionicons name="calendar-outline" size={size} color={color} />
+                    ),
+                }}
+            />
+            <Tabs.Screen
                 name="profile" // Added profile screen correctly to the tabs
                 options={{
                     title: 'Profil',
