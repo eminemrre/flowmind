@@ -1,16 +1,31 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
     StyleSheet,
     SafeAreaView,
     TouchableOpacity,
-    Animated,
+    Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { theme } from '@/constants/theme';
-import { Button } from '@/components/ui/Button';
+import Animated, {
+    useSharedValue,
+    useAnimatedStyle,
+    withRepeat,
+    withSequence,
+    withTiming,
+    withSpring,
+    Easing,
+    cancelAnimation
+} from 'react-native-reanimated';
+
 import { config } from '@/constants/config';
+import { apiClient } from '@/lib/api';
+import { useAuthStore } from '@/stores/authStore';
+import { useTaskStore } from '@/stores/taskStore';
+import { useTheme } from '@/components/ThemeProvider';
+import { useThemedStyles } from '@/hooks/useThemedStyles';
+import { Theme } from '@/constants/theme';
 
 type TimerState = 'idle' | 'running' | 'paused' | 'break';
 
@@ -19,28 +34,29 @@ export default function FocusScreen() {
     const [timeLeft, setTimeLeft] = useState(config.app.defaultPomodoroMinutes * 60);
     const [isBreak, setIsBreak] = useState(false);
     const [sessionsCompleted, setSessionsCompleted] = useState(0);
+    const [totalMinutes, setTotalMinutes] = useState(0);
+    const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
 
-    const pulseAnim = useRef(new Animated.Value(1)).current;
+    const { addXp } = useAuthStore();
+    const { tasks } = useTaskStore();
+    const activeTasks = tasks.filter(t => !t.isCompleted);
+
+    const pulseAnim = useSharedValue(1);
 
     // Animation for timer
     useEffect(() => {
         if (timerState === 'running') {
-            Animated.loop(
-                Animated.sequence([
-                    Animated.timing(pulseAnim, {
-                        toValue: 1.05,
-                        duration: 1000,
-                        useNativeDriver: true,
-                    }),
-                    Animated.timing(pulseAnim, {
-                        toValue: 1,
-                        duration: 1000,
-                        useNativeDriver: true,
-                    }),
-                ])
-            ).start();
+            pulseAnim.value = withRepeat(
+                withSequence(
+                    withTiming(1.05, { duration: 1000, easing: Easing.inOut(Easing.ease) }),
+                    withTiming(1, { duration: 1000, easing: Easing.inOut(Easing.ease) })
+                ),
+                -1, // Infinite repeat
+                true // Reverse
+            );
         } else {
-            pulseAnim.setValue(1);
+            cancelAnimation(pulseAnim);
+            pulseAnim.value = withSpring(1);
         }
     }, [timerState]);
 
@@ -59,26 +75,64 @@ export default function FocusScreen() {
         return () => clearInterval(interval);
     }, [timerState, timeLeft]);
 
-    const handleTimerComplete = () => {
+    const handleTimerComplete = async () => {
         if (isBreak) {
             // Break finished, start new session
             setIsBreak(false);
             setTimeLeft(config.app.defaultPomodoroMinutes * 60);
             setTimerState('idle');
         } else {
-            // Work session finished
+            // Work session finished - save to backend
+            const sessionMinutes = config.app.defaultPomodoroMinutes;
             setSessionsCompleted(prev => prev + 1);
+            setTotalMinutes(prev => prev + sessionMinutes);
+
+            // End session on backend
+            if (currentSessionId) {
+                try {
+                    await apiClient.endFocusSession(currentSessionId, true);
+                } catch { /* silent */ }
+                setCurrentSessionId(null);
+            }
+
+            // Add XP locally (backend handles XP too)
+            addXp(config.xp.focusSessionComplete);
+
             const isLongBreak = (sessionsCompleted + 1) % config.app.sessionsUntilLongBreak === 0;
             setIsBreak(true);
             setTimeLeft(isLongBreak ? config.app.longBreakMinutes * 60 : config.app.defaultBreakMinutes * 60);
             setTimerState('idle');
+
+            Alert.alert('🎉 Tebrikler!', `Oturum tamamlandı! +${config.xp.focusSessionComplete} XP kazandın.`);
         }
     };
 
-    const startTimer = () => setTimerState('running');
+    const startTimer = async () => {
+        setTimerState('running');
+
+        // Start session on backend
+        if (!isBreak) {
+            try {
+                const { data } = await apiClient.startFocusSession();
+                if (data) {
+                    setCurrentSessionId((data as any).id?.toString());
+                }
+            } catch { /* silent - timer still works locally */ }
+        }
+    };
+
     const pauseTimer = () => setTimerState('paused');
     const resumeTimer = () => setTimerState('running');
-    const resetTimer = () => {
+
+    const resetTimer = async () => {
+        // End incomplete session on backend
+        if (currentSessionId) {
+            try {
+                await apiClient.endFocusSession(currentSessionId, false);
+            } catch { /* silent */ }
+            setCurrentSessionId(null);
+        }
+
         setTimerState('idle');
         setIsBreak(false);
         setTimeLeft(config.app.defaultPomodoroMinutes * 60);
@@ -93,6 +147,13 @@ export default function FocusScreen() {
     const progress = isBreak
         ? 1 - (timeLeft / (config.app.defaultBreakMinutes * 60))
         : 1 - (timeLeft / (config.app.defaultPomodoroMinutes * 60));
+
+    const { theme } = useTheme();
+    const styles = useThemedStyles(createStyles);
+
+    const animatedStyle = useAnimatedStyle(() => ({
+        transform: [{ scale: pulseAnim.value }]
+    }));
 
     return (
         <SafeAreaView style={styles.container}>
@@ -111,7 +172,7 @@ export default function FocusScreen() {
                 <Animated.View
                     style={[
                         styles.timerContainer,
-                        { transform: [{ scale: pulseAnim }] }
+                        animatedStyle
                     ]}
                 >
                     <View style={[
@@ -124,7 +185,7 @@ export default function FocusScreen() {
                         </Text>
                     </View>
 
-                    {/* Progress ring would go here */}
+                    {/* Progress ring */}
                     <View style={[
                         styles.progressRing,
                         {
@@ -151,7 +212,7 @@ export default function FocusScreen() {
                     {timerState === 'paused' && (
                         <View style={styles.pausedControls}>
                             <TouchableOpacity style={styles.resetButton} onPress={resetTimer}>
-                                <Ionicons name="refresh" size={28} color={theme.colors.gray600} />
+                                <Ionicons name="refresh" size={28} color={theme.colors.textSecondary} />
                             </TouchableOpacity>
                             <TouchableOpacity style={styles.playButton} onPress={resumeTimer}>
                                 <Ionicons name="play" size={40} color="#fff" />
@@ -169,7 +230,7 @@ export default function FocusScreen() {
                     </View>
                     <View style={styles.statDivider} />
                     <View style={styles.statItem}>
-                        <Text style={styles.statValue}>{sessionsCompleted * 25}</Text>
+                        <Text style={styles.statValue}>{totalMinutes}</Text>
                         <Text style={styles.statLabel}>Dakika</Text>
                     </View>
                     <View style={styles.statDivider} />
@@ -181,9 +242,12 @@ export default function FocusScreen() {
 
                 {/* Current task indicator */}
                 <View style={styles.currentTask}>
-                    <Ionicons name="bookmark-outline" size={16} color={theme.colors.gray400} />
+                    <Ionicons name="bookmark-outline" size={16} color={theme.colors.textSecondary} />
                     <Text style={styles.currentTaskText}>
-                        Görev seçilmedi - Genel odaklanma
+                        {activeTasks.length > 0
+                            ? `📌 ${activeTasks[0].title}`
+                            : 'Görev seçilmedi - Genel odaklanma'
+                        }
                     </Text>
                 </View>
             </View>
@@ -191,10 +255,10 @@ export default function FocusScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: Theme) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: theme.colors.gray50,
+        backgroundColor: theme.colors.background,
     },
     content: {
         flex: 1,
@@ -209,11 +273,11 @@ const styles = StyleSheet.create({
     sessionText: {
         fontSize: theme.fontSize.xl,
         fontWeight: theme.fontWeight.semibold,
-        color: theme.colors.gray800,
+        color: theme.colors.text,
     },
     sessionCount: {
         fontSize: theme.fontSize.sm,
-        color: theme.colors.gray500,
+        color: theme.colors.textSecondary,
         marginTop: theme.spacing.xs,
     },
     timerContainer: {
@@ -224,23 +288,23 @@ const styles = StyleSheet.create({
         width: 260,
         height: 260,
         borderRadius: 130,
-        backgroundColor: '#fff',
+        backgroundColor: theme.colors.card,
         alignItems: 'center',
         justifyContent: 'center',
         ...theme.shadow.lg,
     },
     timerCircleBreak: {
-        backgroundColor: theme.colors.success + '10',
+        backgroundColor: theme.colors.success + '15',
     },
     timerText: {
         fontSize: 56,
         fontWeight: theme.fontWeight.bold,
-        color: theme.colors.gray900,
+        color: theme.colors.text,
         fontVariant: ['tabular-nums'],
     },
     timerLabel: {
         fontSize: theme.fontSize.base,
-        color: theme.colors.gray500,
+        color: theme.colors.textSecondary,
         marginTop: theme.spacing.xs,
     },
     progressRing: {
@@ -282,16 +346,18 @@ const styles = StyleSheet.create({
         width: 56,
         height: 56,
         borderRadius: 28,
-        backgroundColor: theme.colors.gray100,
+        backgroundColor: theme.colors.surface,
         alignItems: 'center',
         justifyContent: 'center',
+        borderWidth: 1,
+        borderColor: theme.colors.border,
     },
     placeholder: {
         width: 56,
     },
     stats: {
         flexDirection: 'row',
-        backgroundColor: '#fff',
+        backgroundColor: theme.colors.card,
         borderRadius: theme.borderRadius.xl,
         padding: theme.spacing.base,
         ...theme.shadow.sm,
@@ -307,12 +373,12 @@ const styles = StyleSheet.create({
     },
     statLabel: {
         fontSize: theme.fontSize.xs,
-        color: theme.colors.gray500,
+        color: theme.colors.textSecondary,
         marginTop: theme.spacing.xs,
     },
     statDivider: {
         width: 1,
-        backgroundColor: theme.colors.gray200,
+        backgroundColor: theme.colors.border,
     },
     currentTask: {
         flexDirection: 'row',
@@ -322,6 +388,6 @@ const styles = StyleSheet.create({
     },
     currentTaskText: {
         fontSize: theme.fontSize.sm,
-        color: theme.colors.gray500,
+        color: theme.colors.textSecondary,
     },
 });

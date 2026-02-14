@@ -5,11 +5,11 @@ export interface User {
     id: string;
     email: string;
     name: string | null;
-    avatarUrl: string | null;
-    createdAt: string;
-    lastActiveAt: string;
-    currentStreak: number;
-    totalXp: number;
+    avatar_url: string | null;
+    created_at: string;
+    last_active_at: string;
+    current_streak: number;
+    total_xp: number;
     level: number;
 }
 

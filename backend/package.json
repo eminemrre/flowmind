@@ -6,9 +6,14 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
+    "test": "jest --detectOpenHandles --forceExit",
     "migrate": "psql $DATABASE_URL -f config/schema.sql"
   },
-  "keywords": ["flowmind", "api", "productivity"],
+  "keywords": [
+    "flowmind",
+    "api",
+    "productivity"
+  ],
   "author": "",
   "license": "MIT",
   "dependencies": {
@@ -19,5 +24,9 @@
     "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "jest": "^30.2.0",
+    "supertest": "^7.2.2"
   }
 }

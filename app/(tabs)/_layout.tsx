@@ -1,8 +1,10 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { theme } from '@/constants/theme';
+import { useTheme } from '@/components/ThemeProvider';
 
 export default function TabLayout() {
+    const { theme } = useTheme();
+
     return (
         <Tabs
             screenOptions={{
@@ -10,7 +12,7 @@ export default function TabLayout() {
                 tabBarInactiveTintColor: theme.colors.gray400,
                 tabBarStyle: {
                     backgroundColor: theme.colors.background,
-                    borderTopColor: theme.colors.gray100,
+                    borderTopColor: theme.colors.border,
                     paddingBottom: 8,
                     paddingTop: 8,
                     height: 80,
@@ -22,10 +24,12 @@ export default function TabLayout() {
                 headerStyle: {
                     backgroundColor: theme.colors.background,
                 },
+                headerTintColor: theme.colors.text,
                 headerShadowVisible: false,
                 headerTitleStyle: {
                     fontWeight: '700',
                     fontSize: 24,
+                    color: theme.colors.text,
                 },
             }}
         >
@@ -70,7 +74,7 @@ export default function TabLayout() {
                 }}
             />
             <Tabs.Screen
-                name="profile"
+                name="profile" // Added profile screen correctly to the tabs
                 options={{
                     title: 'Profil',
                     headerTitle: '👤 Profil',

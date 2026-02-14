@@ -19,10 +19,10 @@ class ApiClient {
         options: RequestInit = {}
     ): Promise<{ data: T | null; error: string | null }> {
         try {
-            const headers: HeadersInit = {
+            const headers: Record<string, string> = {
                 'Content-Type': 'application/json',
                 ...(this.token && { Authorization: `Bearer ${this.token}` }),
-                ...options.headers,
+                ...(options.headers as Record<string, string>),
             };
 
             const response = await fetch(`${this.baseUrl}${endpoint}`, {
@@ -63,6 +63,13 @@ class ApiClient {
 
     async getMe() {
         return this.request<User>('/auth/me');
+    }
+
+    async updateProfile(data: { name?: string; avatar_url?: string }) {
+        return this.request<User>('/auth/profile', {
+            method: 'PATCH',
+            body: JSON.stringify(data),
+        });
     }
 
     // ============ TASKS ============
@@ -139,6 +146,12 @@ class ApiClient {
     // ============ ACHIEVEMENTS ============
     async getAchievements() {
         return this.request<Achievement[]>('/achievements');
+    }
+
+    async checkAchievements() {
+        return this.request<{ new_achievements: any[]; count: number }>('/achievements/check', {
+            method: 'POST',
+        });
     }
 
     // ============ ENERGY ============

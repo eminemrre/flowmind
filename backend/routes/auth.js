@@ -105,6 +105,50 @@ router.get('/me', auth, async (req, res, next) => {
     }
 });
 
+// Update profile
+router.patch('/profile', auth, async (req, res, next) => {
+    try {
+        const { name, avatar_url } = req.body;
+        const updates = [];
+        const values = [];
+        let counter = 1;
+
+        if (name !== undefined) {
+            updates.push(`name = $${counter}`);
+            values.push(name);
+            counter++;
+        }
+
+        if (avatar_url !== undefined) {
+            updates.push(`avatar_url = $${counter}`);
+            values.push(avatar_url);
+            counter++;
+        }
+
+        if (updates.length === 0) {
+            return res.status(400).json({ message: 'No fields to update' });
+        }
+
+        values.push(req.user.id);
+        const query = `
+            UPDATE users 
+            SET ${updates.join(', ')} 
+            WHERE id = $${counter} 
+            RETURNING id, email, name, avatar_url, created_at, last_active_at, current_streak, total_xp, level
+        `;
+
+        const result = await db.query(query, values);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.json(result.rows[0]);
+    } catch (error) {
+        next(error);
+    }
+});
+
 // Logout (client-side token removal, just update last_active)
 router.post('/logout', auth, async (req, res) => {
     await db.query('UPDATE users SET last_active_at = NOW() WHERE id = $1', [req.user.id]);

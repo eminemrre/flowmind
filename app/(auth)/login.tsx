@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, SafeAreaView, KeyboardAvoidingView, Platform, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, StyleSheet, SafeAreaView, KeyboardAvoidingView, Platform, TouchableOpacity, Alert } from 'react-native';
 import { Link, router } from 'expo-router';
 import { theme } from '@/constants/theme';
 import { Button } from '@/components/ui/Button';
@@ -9,27 +9,28 @@ export default function LoginScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
-    const { setUser, setOnboardingComplete } = useAuthStore();
+    const { login } = useAuthStore();
 
     const handleLogin = async () => {
+        // Validation
+        if (!email.trim()) {
+            Alert.alert('Hata', 'E-posta adresi gerekli');
+            return;
+        }
+        if (!password) {
+            Alert.alert('Hata', 'Şifre gerekli');
+            return;
+        }
+
         setLoading(true);
-        // Demo login - gerçek implementasyonda Supabase kullanılacak
-        setTimeout(() => {
-            setUser({
-                id: 'demo-user',
-                email: email || 'demo@flowmind.app',
-                name: 'Demo Kullanıcı',
-                avatarUrl: null,
-                createdAt: new Date().toISOString(),
-                lastActiveAt: new Date().toISOString(),
-                currentStreak: 7,
-                totalXp: 350,
-                level: 4,
-            });
-            setOnboardingComplete(true);
-            setLoading(false);
+        const { success, error } = await login(email.trim(), password);
+        setLoading(false);
+
+        if (success) {
             router.replace('/(tabs)');
-        }, 1000);
+        } else {
+            Alert.alert('Giriş Başarısız', error || 'Bir hata oluştu');
+        }
     };
 
     return (
@@ -55,6 +56,7 @@ export default function LoginScreen() {
                             placeholderTextColor={theme.colors.gray400}
                             keyboardType="email-address"
                             autoCapitalize="none"
+                            autoCorrect={false}
                             value={email}
                             onChangeText={setEmail}
                         />
@@ -92,7 +94,7 @@ export default function LoginScreen() {
                     {/* Social Logins */}
                     <Button
                         title="Apple ile Devam Et"
-                        onPress={() => { }}
+                        onPress={() => Alert.alert('Yakında', 'Apple Sign-In yakında eklenecek!')}
                         variant="secondary"
                         fullWidth
                     />

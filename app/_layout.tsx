@@ -1,12 +1,15 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { View, StyleSheet } from 'react-native';
-import { theme } from '@/constants/theme';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { ThemeProvider, useTheme } from '@/components/ThemeProvider';
 
-export default function RootLayout() {
+function AppContent() {
+    const { theme, isDark } = useTheme();
+
     return (
-        <View style={styles.container}>
-            <StatusBar style="dark" />
+        <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+            <StatusBar style={isDark ? "light" : "dark"} />
             <Stack
                 screenOptions={{
                     headerStyle: {
@@ -18,7 +21,7 @@ export default function RootLayout() {
                     },
                     headerShadowVisible: false,
                     contentStyle: {
-                        backgroundColor: theme.colors.gray50,
+                        backgroundColor: theme.colors.surface,
                     },
                 }}
             >
@@ -39,9 +42,18 @@ export default function RootLayout() {
     );
 }
 
+export default function RootLayout() {
+    return (
+        <GestureHandlerRootView style={{ flex: 1 }}>
+            <ThemeProvider>
+                <AppContent />
+            </ThemeProvider>
+        </GestureHandlerRootView>
+    );
+}
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: theme.colors.background,
     },
 });
