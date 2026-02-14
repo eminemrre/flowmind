@@ -1,7 +1,7 @@
 {
   "name": "flowmind",
   "version": "1.0.0",
-  "description": "FlowMind - AI Productivity Coach",
+  "description": "AI-Powered Productivity Coach. Work with your energy, not against it. Smart task scheduling based on biological rhythms.",
   "main": "expo-router/entry",
   "scripts": {
     "start": "expo start",

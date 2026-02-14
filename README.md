@@ -1,110 +1,109 @@
-   # 🧠 FlowMind AI
-
 <div align="center">
 
-**AI-Powered Productivity Coach for Peak Performance**
+# 🧠 FlowMind
 
-[![React Native](https://img.shields.io/badge/React%20Native-0.76-blue?logo=react)](https://reactnative.dev/)
-[![Expo](https://img.shields.io/badge/Expo-SDK%2052-black?logo=expo)](https://expo.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue?logo=typescript)](https://www.typescriptlang.org/)
-[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
+**AI-Powered Productivity Coach — Work With Your Energy, Not Against It**
 
-[Features](#-features) • [Demo](#-demo) • [Installation](#-installation) • [Tech Stack](#-tech-stack) • [Roadmap](#-roadmap)
+The smart task manager that learns your biological rhythm and schedules your work when you'll actually get it done.
+
+[![React Native](https://img.shields.io/badge/React%20Native-0.76-61DAFB?logo=react)](https://reactnative.dev/)
+[![Expo](https://img.shields.io/badge/Expo-SDK%2052-000020?logo=expo)](https://expo.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178C6?logo=typescript)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=node.js)](https://nodejs.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-4169E1?logo=postgresql)](https://www.postgresql.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue)](LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+
+[Why FlowMind](#-the-problem) · [Features](#-features) · [Quick Start](#-quick-start) · [Tech Stack](#-tech-stack) · [Roadmap](#-roadmap)
 
 </div>
 
 ---
 
-## 🎯 Problem
+## 🎯 The Problem
 
-**Traditional to-do apps fail because they ignore human biology.**
+**Traditional to-do apps set you up to fail.**
 
-- 📉 Energy levels fluctuate throughout the day
-- � Willpower is a limited resource
-- ⏰ Working against your natural rhythm = burnout
-- 📋 Static task lists don't adapt to how you feel
+They treat you like a machine — but you're not. Your productivity follows a biological curve:
 
-## 💡 Solution
+| Time | Energy | Typical App | FlowMind |
+|------|--------|-------------|----------|
+| 🌅 Morning | ⚡ High | Random tasks | Deep work |
+| 🌤 Afternoon | 😐 Medium | Still random | Meetings & communication |
+| 🌙 Evening | 😴 Low | Same list | Light tasks & planning |
 
-**FlowMind uses AI to match your tasks with your energy levels.**
+> **72% of people say they work on the wrong tasks at the wrong time.** FlowMind fixes this.
 
-Instead of forcing you to work on demanding tasks when you're exhausted, FlowMind:
+---
 
-1. **Tracks your energy** throughout the day
-2. **Learns your patterns** (morning person? night owl?)
-3. **Suggests optimal times** for each task type
-4. **Adapts in real-time** based on how you feel right now
+## 💡 How It Works
+
+```
+1. Log your energy level (takes 5 seconds)
+           ↓
+2. AI learns your patterns over time
+           ↓
+3. Tasks are auto-prioritized for NOW
+           ↓
+4. Focus Mode helps you execute
+           ↓
+5. You get more done with less burnout
+```
 
 ---
 
 ## ✨ Features
 
 ### 🌅 Smart Daily Planning
-AI analyzes your energy patterns and schedules tasks when you're most likely to succeed.
+AI analyzes your personal energy patterns and schedules tasks when you're most likely to succeed. Morning person? Your hardest tasks go first. Night owl? FlowMind adapts.
 
 ### 🎯 Focus Mode (Pomodoro+)
-Enhanced Pomodoro timer with:
-- Customizable work/break intervals
-- Session tracking & statistics
-- Break suggestions based on fatigue
+Enhanced Pomodoro timer built for real productivity:
+- ⏱ Customizable work/break intervals
+- 📊 Session tracking with detailed statistics
+- 💡 AI-powered break suggestions based on fatigue levels
+- 🔔 Smart notifications that respect your flow state
 
 ### 📊 Energy Tracking
-- Log your energy level (1-5) throughout the day
-- Visual trends over 7/30 days
-- Identify your peak performance hours
+- Log energy levels (1-5) throughout the day in one tap
+- Visualize trends over 7 and 30 days with interactive charts
+- Identify your personal peak performance hours
+- Correlate energy with task completion to find your optimal rhythm
 
 ### 🏆 Gamification
-- XP for completing tasks & focus sessions
-- Level up system
-- Achievement badges
-- Daily streaks with fire animations
+Stay motivated with a progression system:
+- ⭐ Earn XP for completing tasks and focus sessions
+- 📈 Level up system with escalating challenges
+- 🏅 Achievement badges for milestones
+- 🔥 Daily streaks with animated fire effects
 
 ### 🤖 AI-Powered Insights
-Powered by OpenRouter (Google Gemma 3):
-- Daily motivational insights
-- Task prioritization suggestions
-- Personalized productivity tips
+Powered by Google Gemma 3 via OpenRouter:
+- 🧠 Personalized daily motivational insights
+- 📋 Intelligent task prioritization based on your energy
+- 💡 Context-aware productivity tips that evolve with you
 
 ---
 
-## 📱 Screenshots
+## 📱 Platform Support
 
-| Today | Tasks | Focus | Stats |
-|-------|-------|-------|-------|
-| Coming Soon | Coming Soon | Coming Soon | Coming Soon |
-
----
-
-## 🛠 Tech Stack
-
-### Frontend
-- **React Native** + **Expo** (SDK 52)
-- **TypeScript** for type safety
-- **Expo Router** for file-based navigation
-- **Zustand** for state management
-- **React Native Reanimated** for smooth animations
-
-### Backend
-- **Node.js** + **Express.js**
-- **PostgreSQL** database
-- **JWT** authentication
-- **PM2** process manager
-
-### AI
-- **OpenRouter API** (Google Gemma 3 model)
-- Free tier with fallback handling
+| Platform | Status |
+|----------|--------|
+| 📱 iOS | ✅ Ready (Expo) |
+| 🤖 Android | ✅ Ready (Expo) |
+| 🌐 Web | ✅ Ready (Expo Web) |
 
 ---
 
-## � Installation
+## 🚀 Quick Start
 
 ### Prerequisites
 - Node.js 18+
 - npm or yarn
-- Expo CLI
+- Expo CLI (`npx expo`)
 - iOS Simulator / Android Emulator / Physical Device
 
-### Quick Start
+### Installation
 
 ```bash
 # Clone the repository
@@ -118,19 +117,66 @@ npm install --legacy-peer-deps
 cp .env.example .env
 # Edit .env with your API keys
 
-# Start the development server
+# Start development server
 npx expo start --tunnel
 ```
+
+Then scan the QR code with Expo Go (iOS/Android) or press `w` for web.
 
 ### Environment Variables
 
 ```env
-# OpenRouter AI (get free key at openrouter.ai)
+# AI Engine (get free key at openrouter.ai)
 EXPO_PUBLIC_OPENROUTER_API_KEY=your_key_here
 
-# Backend API URL
+# Backend API URL (for self-hosted backend)
 EXPO_PUBLIC_API_BASE_URL=http://your-server:3000/api
 ```
+
+### Backend Setup
+
+```bash
+cd backend
+
+# Install backend dependencies
+npm install
+
+# Setup PostgreSQL database
+createdb flowmind
+psql flowmind < config/schema.sql
+
+# Start the API server
+npm start
+```
+
+---
+
+## 🛠 Tech Stack
+
+### Mobile App
+| Technology | Purpose |
+|------------|---------|
+| **React Native 0.76** | Cross-platform mobile framework |
+| **Expo SDK 52** | Development toolchain & OTA updates |
+| **TypeScript 5.7** | Type safety across the codebase |
+| **Expo Router** | File-based navigation (like Next.js) |
+| **Zustand** | Lightweight state management |
+| **React Native Reanimated** | 60fps animations |
+| **React Native Chart Kit** | Energy trend visualizations |
+
+### Backend
+| Technology | Purpose |
+|------------|---------|
+| **Node.js + Express** | RESTful API server |
+| **PostgreSQL** | Primary database |
+| **JWT + SecureStore** | Authentication & token storage |
+| **PM2** | Production process management |
+
+### AI
+| Technology | Purpose |
+|------------|---------|
+| **OpenRouter API** | LLM gateway |
+| **Google Gemma 3** | Energy pattern analysis & insights |
 
 ---
 
@@ -139,56 +185,63 @@ EXPO_PUBLIC_API_BASE_URL=http://your-server:3000/api
 ```
 flowmind/
 ├── app/                    # Expo Router screens
-│   ├── (auth)/            # Login, Register
-│   ├── (onboarding)/      # Welcome flow
-│   ├── (tabs)/            # Main tab screens
-│   └── _layout.tsx        # Root layout
-├── components/            # Reusable UI components
-│   └── ui/               # Button, TaskCard, etc.
-├── constants/            # Theme, config
-├── lib/                  # API, AI services
-├── stores/               # Zustand state
-├── types/                # TypeScript types
-├── backend/              # Express.js API
-│   ├── config/          # Database schema
-│   ├── routes/          # API endpoints
-│   └── server.js        # Entry point
-└── scripts/              # Utility scripts
+│   ├── (auth)/             # Login, Register
+│   ├── (onboarding)/       # Welcome flow
+│   ├── (tabs)/             # Main tab screens
+│   │   ├── index.tsx       # Today (Smart Planning)
+│   │   ├── tasks.tsx       # Task Management
+│   │   ├── focus.tsx       # Focus Mode (Pomodoro)
+│   │   └── stats.tsx       # Statistics & Trends
+│   └── _layout.tsx         # Root layout
+├── components/             # Reusable UI components
+│   └── ui/                 # Button, TaskCard, EnergySlider
+├── constants/              # Theme, colors, config
+├── hooks/                  # Custom hooks
+├── lib/                    # API client, AI service
+├── stores/                 # Zustand state stores
+├── types/                  # TypeScript type definitions
+├── backend/                # Express.js API
+│   ├── config/             # Database schema
+│   ├── routes/             # API endpoints
+│   └── server.js           # Entry point
+└── __tests__/              # Unit tests
 ```
 
 ---
 
-## � Roadmap
+## 🗺 Roadmap
 
 ### ✅ Completed
-- [x] Core UI & Navigation
-- [x] Authentication screens
-- [x] Onboarding flow
-- [x] Backend API setup
-- [x] VDS deployment
+- [x] Core UI with tab navigation
+- [x] Authentication (Register/Login/JWT)
+- [x] Onboarding wizard
+- [x] Backend API + VDS deployment
 - [x] OpenRouter AI integration
+- [x] Energy tracking with visualizations
+- [x] Focus Mode (Pomodoro timer)
+- [x] Gamification (XP, levels, streaks)
 
 ### 🔄 In Progress
-- [ ] Task CRUD operations
-- [ ] Backend API integration
-- [ ] Focus timer enhancements
+- [ ] Task CRUD with backend sync
+- [ ] AI-driven daily planning algorithm
+- [ ] Push notifications
 
 ### 📋 Planned
-- [ ] Statistics & charts
-- [ ] Gamification system
-- [ ] Dark mode
-- [ ] Push notifications
-- [ ] App Store release
+- [ ] Offline-first with background sync
+- [ ] Calendar integration
+- [ ] Team/group productivity features
+- [ ] Apple Health / Google Fit integration
+- [ ] App Store & Play Store release
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+We welcome contributions from the community!
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
+3. Commit your changes (`git commit -m 'feat: add amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
@@ -196,21 +249,16 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-## � Author
-
-**Emin Emre**
-- GitHub: [@eminemre35](https://github.com/eminemre35)
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
 
 ---
 
 <div align="center">
 
-**⭐ Star this repo if you find it helpful!**
+**Work smarter, not harder. Let AI match your tasks to your energy.**
 
-Made with ❤️ and ☕
+⭐ Star this repo if you believe productivity should respect biology!
+
+Made with 🧠 and ☕
 
 </div>
