@@ -6,7 +6,7 @@ import { useGamificationStore, ACHIEVEMENT_INFO } from '@/stores/gamificationSto
 import { apiClient } from '@/lib/api';
 import { useThemedStyles } from '@/hooks/useThemedStyles';
 import { useTheme } from '@/components/ThemeProvider';
-import { BarChart } from 'react-native-chart-kit';
+import { BarChart, LineChart } from 'react-native-chart-kit';
 
 interface StatsData {
     tasksCompleted: number;
@@ -181,6 +181,42 @@ export default function StatsScreen() {
                                 }}
                                 style={{ borderRadius: 12, marginTop: 8 }}
                                 showValuesOnTopOfBars
+                            />
+                        </View>
+
+                        {/* Enerji Trend Grafiği */}
+                        <View style={styles.card}>
+                            <Text style={styles.cardTitle}>⚡ Enerji Trendi</Text>
+                            <Text style={[styles.statLabel, { marginBottom: 8 }]}>Saatlik tahmini enerji seviyesi</Text>
+                            <LineChart
+                                data={{
+                                    labels: ['06', '09', '12', '15', '18', '21'],
+                                    datasets: [{
+                                        data: [2, 4, 5, 3, 4, 2], // Simulated energy curve
+                                        color: (opacity = 1) => `rgba(16, 185, 129, ${opacity})`,
+                                        strokeWidth: 3,
+                                    }],
+                                }}
+                                width={Dimensions.get('window').width - 64}
+                                height={180}
+                                yAxisLabel=""
+                                yAxisSuffix=""
+                                fromZero
+                                chartConfig={{
+                                    backgroundColor: theme.colors.card,
+                                    backgroundGradientFrom: theme.colors.card,
+                                    backgroundGradientTo: theme.colors.card,
+                                    decimalPlaces: 0,
+                                    color: (opacity = 1) => `rgba(16, 185, 129, ${opacity})`,
+                                    labelColor: () => theme.colors.textSecondary,
+                                    propsForDots: {
+                                        r: '5',
+                                        strokeWidth: '2',
+                                        stroke: '#10B981',
+                                    },
+                                }}
+                                bezier
+                                style={{ borderRadius: 12, marginTop: 8 }}
                             />
                         </View>
 
