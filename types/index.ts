@@ -49,6 +49,10 @@ export interface Task {
     completedAt: string | null;
     createdAt: string;
     updatedAt: string;
+    // Recurring task fields
+    recurrence?: 'none' | 'daily' | 'weekdays' | 'weekly' | 'monthly' | null;
+    recurrenceEndDate?: string | null;
+    parentTaskId?: string | null;
 }
 
 export interface CreateTaskInput {
@@ -60,6 +64,8 @@ export interface CreateTaskInput {
     estimatedMinutes?: number;
     dueDate?: string;
     scheduledTime?: string;
+    recurrence?: 'none' | 'daily' | 'weekdays' | 'weekly' | 'monthly';
+    recurrenceEndDate?: string;
 }
 
 // ============ ENERGY ============
