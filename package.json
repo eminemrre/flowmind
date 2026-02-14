@@ -16,9 +16,18 @@
     "ai",
     "pomodoro",
     "react-native",
-    "expo"
+    "expo",
+    "focus",
+    "time-management",
+    "gemma",
+    "llm"
   ],
-  "author": "",
+  "author": "Emin Emre <emin3619@gmail.com>",
+  "homepage": "https://github.com/eminemre35/flowmind#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eminemre35/flowmind.git"
+  },
   "license": "MIT",
   "type": "commonjs",
   "dependencies": {
