@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     View,
     Text,
@@ -6,6 +6,7 @@ import {
     SafeAreaView,
     TouchableOpacity,
     Alert,
+    AppState,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, {
@@ -26,6 +27,15 @@ import { useTaskStore } from '@/stores/taskStore';
 import { useTheme } from '@/components/ThemeProvider';
 import { useThemedStyles } from '@/hooks/useThemedStyles';
 import { Theme } from '@/constants/theme';
+import {
+    saveTimerState,
+    loadTimerState,
+    clearTimerState,
+    getRemainingSeconds,
+    scheduleTimerEndNotification,
+    cancelTimerNotification,
+    registerBackgroundTimer,
+} from '@/lib/backgroundTimer';
 
 type TimerState = 'idle' | 'running' | 'paused' | 'break';
 
@@ -42,6 +52,53 @@ export default function FocusScreen() {
     const activeTasks = tasks.filter(t => !t.isCompleted);
 
     const pulseAnim = useSharedValue(1);
+    const appState = useRef(AppState.currentState);
+    const timerNotifId = useRef<string | null>(null);
+
+    // Register background task on mount
+    useEffect(() => {
+        registerBackgroundTimer();
+    }, []);
+
+    // AppState listener — save/restore timer on background/foreground
+    useEffect(() => {
+        const sub = AppState.addEventListener('change', async (nextAppState) => {
+            if (appState.current === 'active' && nextAppState.match(/inactive|background/)) {
+                // Going to background — save timer state
+                if (timerState === 'running' && timeLeft > 0) {
+                    await saveTimerState({
+                        endTime: Date.now() + timeLeft * 1000,
+                        isBreak,
+                        sessionMinutes: config.app.defaultPomodoroMinutes,
+                    });
+                    // Schedule notification for timer end
+                    const nId = await scheduleTimerEndNotification(timeLeft, isBreak);
+                    timerNotifId.current = nId;
+                }
+            } else if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
+                // Coming to foreground — restore timer
+                const saved = await loadTimerState();
+                if (saved) {
+                    const remaining = getRemainingSeconds(saved);
+                    if (remaining > 0) {
+                        setTimeLeft(remaining);
+                        setIsBreak(saved.isBreak);
+                    } else {
+                        // Timer completed while in background
+                        handleTimerComplete();
+                    }
+                    await clearTimerState();
+                }
+                // Cancel scheduled notification
+                if (timerNotifId.current) {
+                    await cancelTimerNotification(timerNotifId.current);
+                    timerNotifId.current = null;
+                }
+            }
+            appState.current = nextAppState;
+        });
+        return () => sub.remove();
+    }, [timerState, timeLeft, isBreak]);
 
     // Animation for timer
     useEffect(() => {
@@ -131,6 +188,13 @@ export default function FocusScreen() {
                 await apiClient.endFocusSession(currentSessionId, false);
             } catch { /* silent */ }
             setCurrentSessionId(null);
+        }
+
+        // Clear background state
+        await clearTimerState();
+        if (timerNotifId.current) {
+            await cancelTimerNotification(timerNotifId.current);
+            timerNotifId.current = null;
         }
 
         setTimerState('idle');

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { Task, DailyPlan } from '@/types';
 import { apiClient } from '@/lib/api';
+import { cacheTasks, getCachedTasks, syncPendingActions, addPendingAction } from '@/lib/offlineStore';
 
 interface TaskState {
     // State
@@ -93,14 +94,31 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     fetchTasks: async () => {
         set({ isLoading: true, error: null });
         try {
+            // Try to sync pending offline actions first
+            await syncPendingActions().catch(() => { });
+
             const { data, error } = await apiClient.getTasks();
             if (error || !data) {
+                // Offline fallback — load from cache
+                const cached = await getCachedTasks();
+                if (cached.length > 0) {
+                    set({ tasks: cached, todaysTasks: computeTodaysTasks(cached), isLoading: false });
+                    return;
+                }
                 set({ isLoading: false, error: error || 'Görevler yüklenemedi' });
                 return;
             }
             const tasks = (data as any[]).map(mapBackendTask);
+            // Cache tasks for offline use
+            await cacheTasks(tasks);
             set({ tasks, todaysTasks: computeTodaysTasks(tasks), isLoading: false });
         } catch {
+            // Network error — load from cache
+            const cached = await getCachedTasks();
+            if (cached.length > 0) {
+                set({ tasks: cached, todaysTasks: computeTodaysTasks(cached), isLoading: false });
+                return;
+            }
             set({ isLoading: false, error: 'Bağlantı hatası' });
         }
     },
