@@ -1,22 +1,41 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, SafeAreaView, KeyboardAvoidingView, Platform, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, StyleSheet, SafeAreaView, KeyboardAvoidingView, Platform, TouchableOpacity, Alert } from 'react-native';
 import { Link, router } from 'expo-router';
 import { theme } from '@/constants/theme';
 import { Button } from '@/components/ui/Button';
+import { useAuthStore } from '@/stores/authStore';
 
 export default function RegisterScreen() {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
+    const { register } = useAuthStore();
 
     const handleRegister = async () => {
+        // Validation
+        if (!name.trim()) {
+            Alert.alert('Hata', 'İsim gerekli');
+            return;
+        }
+        if (!email.trim()) {
+            Alert.alert('Hata', 'E-posta adresi gerekli');
+            return;
+        }
+        if (password.length < 8) {
+            Alert.alert('Hata', 'Şifre en az 8 karakter olmalı');
+            return;
+        }
+
         setLoading(true);
-        // Demo - gerçek implementasyonda Supabase
-        setTimeout(() => {
-            setLoading(false);
+        const { success, error } = await register(email.trim(), password, name.trim());
+        setLoading(false);
+
+        if (success) {
             router.replace('/(onboarding)/welcome');
-        }, 1000);
+        } else {
+            Alert.alert('Kayıt Başarısız', error || 'Bir hata oluştu');
+        }
     };
 
     return (
@@ -33,7 +52,7 @@ export default function RegisterScreen() {
                         <TextInput style={styles.input} placeholder="Adın" placeholderTextColor={theme.colors.gray400} value={name} onChangeText={setName} />
 
                         <Text style={styles.label}>E-posta</Text>
-                        <TextInput style={styles.input} placeholder="ornek@email.com" placeholderTextColor={theme.colors.gray400} keyboardType="email-address" autoCapitalize="none" value={email} onChangeText={setEmail} />
+                        <TextInput style={styles.input} placeholder="ornek@email.com" placeholderTextColor={theme.colors.gray400} keyboardType="email-address" autoCapitalize="none" autoCorrect={false} value={email} onChangeText={setEmail} />
 
                         <Text style={styles.label}>Şifre</Text>
                         <TextInput style={styles.input} placeholder="En az 8 karakter" placeholderTextColor={theme.colors.gray400} secureTextEntry value={password} onChangeText={setPassword} />

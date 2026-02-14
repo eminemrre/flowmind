@@ -4,6 +4,13 @@ const { auth } = require('../middleware/auth');
 
 const router = express.Router();
 
+// Allowed fields for task updates (whitelist)
+const ALLOWED_UPDATE_FIELDS = [
+    'title', 'description', 'category', 'priority',
+    'energy_level', 'estimated_minutes', 'due_date',
+    'scheduled_time', 'is_completed',
+];
+
 // Get all tasks
 router.get('/', auth, async (req, res, next) => {
     try {
@@ -22,15 +29,26 @@ router.post('/', auth, async (req, res, next) => {
     try {
         const { title, description, category, priority, energy_level, estimated_minutes, due_date, scheduled_time } = req.body;
 
-        if (!title) {
+        if (!title || typeof title !== 'string' || title.trim().length === 0) {
             return res.status(400).json({ message: 'Title required' });
         }
+
+        if (title.length > 500) {
+            return res.status(400).json({ message: 'Title too long (max 500 chars)' });
+        }
+
+        const validPriorities = ['low', 'medium', 'high', 'urgent'];
+        const validEnergy = ['low', 'medium', 'high'];
+
+        const safePriority = validPriorities.includes(priority) ? priority : 'medium';
+        const safeEnergy = validEnergy.includes(energy_level) ? energy_level : 'medium';
+        const safeMinutes = Math.min(Math.max(parseInt(estimated_minutes) || 30, 1), 480);
 
         const result = await db.query(
             `INSERT INTO tasks (user_id, title, description, category, priority, energy_level, estimated_minutes, due_date, scheduled_time)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING *`,
-            [req.user.id, title, description, category || 'general', priority || 'medium', energy_level || 'medium', estimated_minutes || 30, due_date, scheduled_time]
+            [req.user.id, title.trim(), description || null, category || 'general', safePriority, safeEnergy, safeMinutes, due_date || null, scheduled_time || null]
         );
 
         res.status(201).json(result.rows[0]);
@@ -45,22 +63,22 @@ router.patch('/:id', auth, async (req, res, next) => {
         const { id } = req.params;
         const updates = req.body;
 
-        // Build dynamic update query
-        const fields = Object.keys(updates);
-        const values = Object.values(updates);
+        // Filter to only allowed fields (whitelist)
+        const safeFields = Object.keys(updates).filter(f => ALLOWED_UPDATE_FIELDS.includes(f));
+        const safeValues = safeFields.map(f => updates[f]);
 
-        if (fields.length === 0) {
-            return res.status(400).json({ message: 'No fields to update' });
+        if (safeFields.length === 0) {
+            return res.status(400).json({ message: 'No valid fields to update' });
         }
 
-        const setClause = fields.map((f, i) => `${f} = $${i + 1}`).join(', ');
-        values.push(id, req.user.id);
+        const setClause = safeFields.map((f, i) => `${f} = $${i + 1}`).join(', ');
+        safeValues.push(id, req.user.id);
 
         const result = await db.query(
             `UPDATE tasks SET ${setClause}, updated_at = NOW() 
-       WHERE id = $${values.length - 1} AND user_id = $${values.length}
+       WHERE id = $${safeValues.length - 1} AND user_id = $${safeValues.length}
        RETURNING *`,
-            values
+            safeValues
         );
 
         if (result.rows.length === 0) {

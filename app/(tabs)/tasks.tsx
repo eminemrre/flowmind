@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
     View,
     Text,
@@ -7,69 +7,38 @@ import {
     SafeAreaView,
     TouchableOpacity,
     RefreshControl,
+    ActivityIndicator,
+    Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { theme } from '@/constants/theme';
-import { Button } from '@/components/ui/Button';
+
 import { TaskCard } from '@/components/ui/TaskCard';
+import { Confetti } from '@/components/ui/Confetti';
+import { EmptyState } from '@/components/ui/EmptyState';
 import TaskModal from '@/components/TaskModal';
 import DeleteConfirmModal from '@/components/DeleteConfirmModal';
 import { Task } from '@/types';
-
-// Demo data - later will be replaced with API calls
-const initialTasks: Task[] = [
-    {
-        id: '1',
-        userId: 'demo',
-        title: 'Proje X Kodlama',
-        description: 'API integration tamamla',
-        category: 'work',
-        priority: 'high',
-        energyLevel: 'high',
-        estimatedMinutes: 120,
-        dueDate: new Date().toISOString(),
-        scheduledTime: null,
-        isCompleted: false,
-        completedAt: null,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-    },
-    {
-        id: '2',
-        userId: 'demo',
-        title: 'E-postaları Cevapla',
-        description: 'Müşteri maillerini yanıtla',
-        category: 'personal',
-        priority: 'medium',
-        energyLevel: 'low',
-        estimatedMinutes: 30,
-        dueDate: null,
-        scheduledTime: null,
-        isCompleted: false,
-        completedAt: null,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-    },
-    {
-        id: '3',
-        userId: 'demo',
-        title: 'Egzersiz Yap',
-        description: '30 dakika koşu',
-        category: 'health',
-        priority: 'low',
-        energyLevel: 'medium',
-        estimatedMinutes: 45,
-        dueDate: null,
-        scheduledTime: null,
-        isCompleted: true,
-        completedAt: new Date().toISOString(),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-    },
-];
+import { useTaskStore } from '@/stores/taskStore';
+import { useTheme } from '@/components/ThemeProvider';
+import { useThemedStyles } from '@/hooks/useThemedStyles';
+import { Theme } from '@/constants/theme';
 
 export default function TasksScreen() {
-    const [tasks, setTasks] = useState<Task[]>(initialTasks);
+    const {
+        tasks,
+        isLoading,
+        error,
+        fetchTasks,
+        createTask,
+        updateTask,
+        deleteTask,
+        completeTask,
+        clearError,
+    } = useTaskStore();
+
+    const { theme } = useTheme();
+    const styles = useThemedStyles(createStyles);
+
     const [isModalVisible, setModalVisible] = useState(false);
     const [isDeleteModalVisible, setDeleteModalVisible] = useState(false);
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
@@ -77,11 +46,24 @@ export default function TasksScreen() {
     const [refreshing, setRefreshing] = useState(false);
     const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
 
-    const onRefresh = useCallback(() => {
-        setRefreshing(true);
-        // Simulate API refresh
-        setTimeout(() => setRefreshing(false), 1000);
+    // Fetch tasks on mount
+    useEffect(() => {
+        fetchTasks();
     }, []);
+
+    // Show errors
+    useEffect(() => {
+        if (error) {
+            Alert.alert('Hata', error);
+            clearError();
+        }
+    }, [error]);
+
+    const onRefresh = useCallback(async () => {
+        setRefreshing(true);
+        await fetchTasks();
+        setRefreshing(false);
+    }, [fetchTasks]);
 
     const handleAddTask = () => {
         setSelectedTask(null);
@@ -100,90 +82,68 @@ export default function TasksScreen() {
         setDeleteModalVisible(true);
     };
 
-    const handleToggleComplete = (task: Task) => {
-        setTasks(prev =>
-            prev.map(t =>
-                t.id === task.id
-                    ? {
-                        ...t,
-                        isCompleted: !t.isCompleted,
-                        completedAt: !t.isCompleted ? new Date().toISOString() : null,
-                    }
-                    : t
-            )
-        );
-    };
+    // Confetti State
+    const [showConfetti, setShowConfetti] = useState(false);
+    const [confettiCoords, setConfettiCoords] = useState({ x: 0, y: 0 });
 
-    const handleSaveTask = (taskData: Partial<Task>) => {
-        if (modalMode === 'add') {
-            const newTask: Task = {
-                id: Date.now().toString(),
-                userId: 'demo',
-                title: taskData.title || '',
-                description: taskData.description || null,
-                category: taskData.category || 'other',
-                priority: taskData.priority || 'medium',
-                energyLevel: taskData.energyLevel || 'medium',
-                estimatedMinutes: taskData.estimatedMinutes || 25,
-                dueDate: null,
-                scheduledTime: null,
-                isCompleted: false,
-                completedAt: null,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-            };
-            setTasks(prev => [newTask, ...prev]);
+    const handleToggleComplete = async (task: Task) => {
+        if (!task.isCompleted) {
+            // Trigger confetti
+            setConfettiCoords({ x: 150, y: 100 }); // Approximate center or use touch coordinates if possible
+            setShowConfetti(true);
+            await completeTask(task.id);
         } else {
-            setTasks(prev =>
-                prev.map(t =>
-                    t.id === selectedTask?.id
-                        ? { ...t, ...taskData, updatedAt: new Date().toISOString() }
-                        : t
-                )
-            );
+            // Uncomplete: update via PATCH
+            await updateTask(task.id, { isCompleted: false });
         }
     };
 
-    const handleConfirmDelete = () => {
+    const handleSaveTask = async (taskData: Partial<Task>) => {
+        if (modalMode === 'add') {
+            await createTask(taskData);
+        } else if (selectedTask) {
+            await updateTask(selectedTask.id, taskData);
+        }
+    };
+
+    const handleConfirmDelete = async () => {
         if (selectedTask) {
-            setTasks(prev => prev.filter(t => t.id !== selectedTask.id));
+            await deleteTask(selectedTask.id);
             setSelectedTask(null);
         }
     };
 
-    const filteredTasks = tasks.filter(task => {
-        if (filter === 'active') return !task.isCompleted;
-        if (filter === 'completed') return task.isCompleted;
-        return true;
-    });
+    // ... (rest of the file)
 
-    const activeTasks = filteredTasks.filter(t => !t.isCompleted);
-    const completedTasks = filteredTasks.filter(t => t.isCompleted);
+    // ... (rest of the file) // This comment suggests we are keeping logic above, but replace_file_content needs context. 
+    // I will replace the component return and styles definition.
+
+    // I will replace the component return and styles definition.
 
     return (
         <SafeAreaView style={styles.container}>
-            {/* Header */}
             <View style={styles.header}>
-                <Text style={styles.headerTitle}>📋 Görevler</Text>
+                <Text style={styles.headerTitle}>Görevler</Text>
                 <TouchableOpacity style={styles.addButton} onPress={handleAddTask}>
                     <Ionicons name="add" size={24} color="#fff" />
                 </TouchableOpacity>
             </View>
 
-            {/* Filter Tabs */}
             <View style={styles.filterRow}>
-                {(['all', 'active', 'completed'] as const).map(f => (
+                {(['all', 'active', 'completed'] as const).map((f) => (
                     <TouchableOpacity
                         key={f}
                         style={[styles.filterTab, filter === f && styles.filterTabActive]}
                         onPress={() => setFilter(f)}
                     >
                         <Text style={[styles.filterText, filter === f && styles.filterTextActive]}>
-                            {f === 'all' ? 'Tümü' : f === 'active' ? 'Aktif' : 'Tamamlanan'}
+                            {f === 'all' ? 'Tümü' : f === 'active' ? 'Devam Eden' : 'Tamamlanan'}
                         </Text>
                         <View style={[styles.filterBadge, filter === f && styles.filterBadgeActive]}>
                             <Text style={[styles.filterBadgeText, filter === f && styles.filterBadgeTextActive]}>
-                                {f === 'all' ? tasks.length : f === 'active' ? tasks.filter(t => !t.isCompleted).length : tasks.filter(t => t.isCompleted).length}
+                                {tasks.filter(t =>
+                                    f === 'all' ? true : f === 'active' ? !t.isCompleted : t.isCompleted
+                                ).length}
                             </Text>
                         </View>
                     </TouchableOpacity>
@@ -194,54 +154,83 @@ export default function TasksScreen() {
                 style={styles.scrollView}
                 contentContainerStyle={styles.content}
                 refreshControl={
-                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.colors.primary} />
                 }
             >
-                {/* Active Tasks */}
-                {activeTasks.length > 0 && (
-                    <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>🎯 Yapılacak</Text>
-                        {activeTasks.map(task => (
-                            <TaskCard
-                                key={task.id}
-                                task={task}
-                                onPress={() => handleEditTask(task)}
-                                onComplete={() => handleToggleComplete(task)}
-                                onDelete={() => handleDeleteTask(task)}
-                            />
-                        ))}
+                {isLoading && !refreshing ? (
+                    <View style={styles.loadingState}>
+                        <ActivityIndicator size="large" color={theme.colors.primary} />
+                        <Text style={styles.loadingText}>Görevler yükleniyor...</Text>
                     </View>
-                )}
+                ) : tasks.length === 0 ? (
+                    <EmptyState
+                        title="Henüz görev yok"
+                        subtitle="Yeni bir görev ekleyerek üretkenliğini artır!"
+                        actionLabel="Yeni Görev Ekle"
+                        onAction={handleAddTask}
+                        icon="clipboard-outline"
+                    />
+                ) : (
+                    <>
+                        {/* Devam Edenler */}
+                        {(filter === 'all' || filter === 'active') && (
+                            <View style={styles.section}>
+                                <Text style={styles.sectionTitle}>Devam Edenler</Text>
+                                {tasks.filter(t => !t.isCompleted).map((task, index) => (
+                                    <TaskCard
+                                        key={task.id}
+                                        index={index}
+                                        task={task}
+                                        onPress={() => handleEditTask(task)}
+                                        onComplete={() => handleToggleComplete(task)}
+                                        onDelete={() => handleDeleteTask(task)}
+                                    />
+                                ))}
+                                {tasks.filter(t => !t.isCompleted).length === 0 && (
+                                    <EmptyState
+                                        title="Harika!"
+                                        subtitle="Tüm aktif görevlerini tamamladın."
+                                        icon="checkmark-circle-outline"
+                                        style={{ padding: 16 }}
+                                    />
+                                )}
+                            </View>
+                        )}
 
-                {/* Completed Tasks */}
-                {completedTasks.length > 0 && (
-                    <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>✅ Tamamlanan</Text>
-                        {completedTasks.map(task => (
-                            <TaskCard
-                                key={task.id}
-                                task={task}
-                                onPress={() => handleEditTask(task)}
-                                onComplete={() => handleToggleComplete(task)}
-                                onDelete={() => handleDeleteTask(task)}
-                            />
-                        ))}
-                    </View>
-                )}
-
-                {/* Empty State */}
-                {filteredTasks.length === 0 && (
-                    <View style={styles.emptyState}>
-                        <Ionicons name="checkmark-circle-outline" size={64} color={theme.colors.textSecondary} />
-                        <Text style={styles.emptyTitle}>
-                            {filter === 'completed' ? 'Henüz tamamlanan görev yok' : 'Görev bulunamadı'}
-                        </Text>
-                        <Text style={styles.emptySubtitle}>
-                            {filter === 'all' ? 'Yeni görev eklemek için + butonuna tıkla' : ''}
-                        </Text>
-                    </View>
+                        {/* Tamamlananlar */}
+                        {(filter === 'all' || filter === 'completed') && (
+                            <View style={styles.section}>
+                                <Text style={styles.sectionTitle}>Tamamlananlar</Text>
+                                {tasks.filter(t => t.isCompleted).map((task, index) => (
+                                    <TaskCard
+                                        key={task.id}
+                                        index={index}
+                                        task={task}
+                                        onPress={() => handleEditTask(task)}
+                                        onComplete={() => handleToggleComplete(task)}
+                                        onDelete={() => handleDeleteTask(task)}
+                                    />
+                                ))}
+                                {tasks.filter(t => t.isCompleted).length === 0 && (
+                                    <Text style={{ color: theme.colors.textSecondary, fontStyle: 'italic' }}>Tamamlanan görev yok.</Text>
+                                )}
+                            </View>
+                        )}
+                    </>
                 )}
             </ScrollView>
+
+            {/* Confetti Overlay */}
+            {showConfetti && (
+                <View style={StyleSheet.absoluteFill} pointerEvents="none">
+                    <Confetti
+                        x={confettiCoords.x}
+                        y={confettiCoords.y}
+                        count={50}
+                        onAnimationComplete={() => setShowConfetti(false)}
+                    />
+                </View>
+            )}
 
             {/* Task Modal */}
             <TaskModal
@@ -263,7 +252,7 @@ export default function TasksScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: Theme) => StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: theme.colors.background,
@@ -285,8 +274,8 @@ const styles = StyleSheet.create({
         height: 44,
         borderRadius: 22,
         backgroundColor: theme.colors.primary,
-        justifyContent: 'center',
-        alignItems: 'center',
+        justifyContent: 'center' as const,
+        alignItems: 'center' as const,
     },
     filterRow: {
         flexDirection: 'row',
@@ -296,15 +285,18 @@ const styles = StyleSheet.create({
     },
     filterTab: {
         flexDirection: 'row',
-        alignItems: 'center',
+        alignItems: 'center' as const,
         paddingHorizontal: theme.spacing.md,
         paddingVertical: theme.spacing.sm,
         borderRadius: theme.borderRadius.full,
         backgroundColor: theme.colors.surface,
         gap: theme.spacing.xs,
+        borderWidth: 1,
+        borderColor: theme.colors.border,
     },
     filterTabActive: {
         backgroundColor: theme.colors.primary,
+        borderColor: theme.colors.primary,
     },
     filterText: {
         fontSize: 14,
@@ -319,8 +311,8 @@ const styles = StyleSheet.create({
         height: 20,
         borderRadius: 10,
         backgroundColor: theme.colors.border,
-        justifyContent: 'center',
-        alignItems: 'center',
+        justifyContent: 'center' as const,
+        alignItems: 'center' as const,
         paddingHorizontal: 6,
     },
     filterBadgeActive: {
@@ -349,9 +341,20 @@ const styles = StyleSheet.create({
         color: theme.colors.text,
         marginBottom: theme.spacing.md,
     },
+    loadingState: {
+        flex: 1,
+        alignItems: 'center' as const,
+        justifyContent: 'center' as const,
+        paddingVertical: 40,
+    },
+    loadingText: {
+        fontSize: 14,
+        color: theme.colors.textSecondary,
+        marginTop: theme.spacing.md,
+    },
     emptyState: {
-        alignItems: 'center',
-        justifyContent: 'center',
+        alignItems: 'center' as const,
+        justifyContent: 'center' as const,
         paddingVertical: 60,
     },
     emptyTitle: {

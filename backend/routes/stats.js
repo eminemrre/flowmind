@@ -4,29 +4,33 @@ const { auth } = require('../middleware/auth');
 
 const router = express.Router();
 
+// Allowed period values (whitelist)
+const PERIOD_INTERVALS = {
+    day: '1 day',
+    week: '7 days',
+    month: '30 days',
+};
+
 // Get stats
 router.get('/', auth, async (req, res, next) => {
     try {
-        const { period } = req.query; // day, week, month
+        const { period } = req.query;
+        const interval = PERIOD_INTERVALS[period] || PERIOD_INTERVALS.week;
 
-        let dateFilter = "started_at >= NOW() - INTERVAL '7 days'";
-        if (period === 'day') dateFilter = "started_at >= NOW() - INTERVAL '1 day'";
-        if (period === 'month') dateFilter = "started_at >= NOW() - INTERVAL '30 days'";
-
-        // Tasks completed
+        // Tasks completed - using parameterized interval via make_interval or safe whitelist
         const tasksResult = await db.query(
             `SELECT COUNT(*) as count FROM tasks 
        WHERE user_id = $1 AND is_completed = true 
-       AND completed_at >= NOW() - INTERVAL '${period === 'day' ? '1 day' : period === 'month' ? '30 days' : '7 days'}'`,
-            [req.user.id]
+       AND completed_at >= NOW() - $2::interval`,
+            [req.user.id, interval]
         );
 
         // Focus minutes
         const focusResult = await db.query(
             `SELECT COALESCE(SUM(duration_minutes), 0) as minutes 
        FROM focus_sessions 
-       WHERE user_id = $1 AND completed = true AND ${dateFilter}`,
-            [req.user.id]
+       WHERE user_id = $1 AND completed = true AND started_at >= NOW() - $2::interval`,
+            [req.user.id, interval]
         );
 
         // User info

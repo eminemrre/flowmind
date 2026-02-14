@@ -1,82 +1,78 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     View,
     Text,
     ScrollView,
     StyleSheet,
     SafeAreaView,
+    ActivityIndicator,
+    RefreshControl,
 } from 'react-native';
+import { router } from 'expo-router';
 import { theme } from '@/constants/theme';
 import { Button } from '@/components/ui/Button';
 import { TaskCard } from '@/components/ui/TaskCard';
 import { EnergyBar } from '@/components/ui/EnergyBar';
+import { Confetti } from '@/components/ui/Confetti';
 import { useTaskStore } from '@/stores/taskStore';
 import { useAuthStore } from '@/stores/authStore';
-import { Task } from '@/types';
-
-// Demo data for initial testing
-const demoTasks: Task[] = [
-    {
-        id: '1',
-        userId: 'demo',
-        title: 'Proje X Kodlama',
-        description: 'API integration ve backend bağlantısı',
-        category: 'work',
-        priority: 'high',
-        energyLevel: 'high',
-        estimatedMinutes: 120,
-        dueDate: new Date().toISOString(),
-        scheduledTime: new Date(new Date().setHours(9, 0)).toISOString(),
-        isCompleted: false,
-        completedAt: null,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-    },
-    {
-        id: '2',
-        userId: 'demo',
-        title: 'E-postaları Cevapla',
-        description: 'Müşteri e-postalarını kontrol et',
-        category: 'communication',
-        priority: 'medium',
-        energyLevel: 'low',
-        estimatedMinutes: 30,
-        dueDate: new Date().toISOString(),
-        scheduledTime: new Date(new Date().setHours(11, 30)).toISOString(),
-        isCompleted: false,
-        completedAt: null,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-    },
-    {
-        id: '3',
-        userId: 'demo',
-        title: 'Toplantı Notları',
-        description: 'Dünkü toplantının notlarını düzenle',
-        category: 'work',
-        priority: 'low',
-        energyLevel: 'medium',
-        estimatedMinutes: 45,
-        dueDate: new Date().toISOString(),
-        scheduledTime: new Date(new Date().setHours(14, 0)).toISOString(),
-        isCompleted: true,
-        completedAt: new Date().toISOString(),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-    },
-];
+import { aiService } from '@/lib/ai';
 
 export default function TodayScreen() {
     const { user } = useAuthStore();
-    const { todaysTasks, completeTask } = useTaskStore();
+    const { tasks, todaysTasks, isLoading, fetchTasks, completeTask } = useTaskStore();
 
-    // Use demo data if no tasks
-    const tasks = todaysTasks.length > 0 ? todaysTasks : demoTasks;
-    const pendingTasks = tasks.filter(t => !t.isCompleted);
-    const completedTasks = tasks.filter(t => t.isCompleted);
+    const [aiInsight, setAiInsight] = useState<string>('');
+    const [aiLoading, setAiLoading] = useState(false);
+    const [refreshing, setRefreshing] = useState(false);
+
+    // Confetti State
+    const [showConfetti, setShowConfetti] = useState(false);
+    const [confettiCoords, setConfettiCoords] = useState({ x: 0, y: 0 });
+
+    const handleTaskComplete = async (taskId: string) => {
+        // Trigger confetti
+        setConfettiCoords({ x: 150, y: 100 });
+        setShowConfetti(true);
+        await completeTask(taskId);
+    };
+
+    // Use today's tasks if available, otherwise show all pending tasks (max 5)
+    const displayTasks = todaysTasks.length > 0 ? todaysTasks : tasks.filter(t => !t.isCompleted).slice(0, 5);
+    const pendingTasks = displayTasks.filter(t => !t.isCompleted);
+    const completedTasks = displayTasks.filter(t => t.isCompleted);
 
     const greeting = getGreeting();
     const userName = user?.name || 'Kullanıcı';
+
+    // Fetch tasks and AI insight on mount
+    useEffect(() => {
+        fetchTasks();
+        loadAiInsight();
+    }, []);
+
+    const loadAiInsight = async () => {
+        setAiLoading(true);
+        try {
+            const currentHour = new Date().getHours();
+            const insight = await aiService.getDailyInsight(
+                pendingTasks,
+                3, // default energy level
+                currentHour
+            );
+            setAiInsight(insight);
+        } catch {
+            setAiInsight('Bugünkü görevlerini kontrol et ve en önemli olandan başla! 💪');
+        }
+        setAiLoading(false);
+    };
+
+    const onRefresh = async () => {
+        setRefreshing(true);
+        await fetchTasks();
+        await loadAiInsight();
+        setRefreshing(false);
+    };
 
     return (
         <SafeAreaView style={styles.container}>
@@ -84,6 +80,9 @@ export default function TodayScreen() {
                 style={styles.scrollView}
                 contentContainerStyle={styles.content}
                 showsVerticalScrollIndicator={false}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                }
             >
                 {/* Greeting */}
                 <View style={styles.greetingSection}>
@@ -105,65 +104,99 @@ export default function TodayScreen() {
                         <Text style={styles.aiEmoji}>🧠</Text>
                         <Text style={styles.aiTitle}>AI Önerisi</Text>
                     </View>
-                    <Text style={styles.aiText}>
-                        Şu an enerji seviyeniz yüksek! En zorlu görev olan "Proje X Kodlama"
-                        için harika bir zaman. Öğleden sonra enerji düşebilir, hafif işleri
-                        o zamana bırakabilirsin.
-                    </Text>
+                    {aiLoading ? (
+                        <ActivityIndicator size="small" color={theme.colors.primary} style={{ marginVertical: 12 }} />
+                    ) : (
+                        <Text style={styles.aiText}>
+                            {aiInsight || 'Bugünkü görevlerini kontrol et ve en önemli olandan başla! 💪'}
+                        </Text>
+                    )}
                     <Button
-                        title="Planı Kabul Et"
-                        onPress={() => { }}
+                        title="Yenile"
+                        onPress={loadAiInsight}
                         size="sm"
                         style={styles.aiButton}
                     />
                 </View>
 
-                {/* Pending Tasks */}
-                {pendingTasks.length > 0 && (
-                    <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>📋 Yapılacaklar</Text>
-                        {pendingTasks.map((task) => (
-                            <TaskCard
-                                key={task.id}
-                                task={task}
-                                onComplete={() => completeTask(task.id)}
-                                onPress={() => { }}
-                            />
-                        ))}
+                {/* Loading State */}
+                {isLoading && tasks.length === 0 ? (
+                    <View style={styles.loadingState}>
+                        <ActivityIndicator size="large" color={theme.colors.primary} />
                     </View>
-                )}
+                ) : (
+                    <>
+                        {/* Pending Tasks */}
+                        {pendingTasks.length > 0 && (
+                            <View style={styles.section}>
+                                <Text style={styles.sectionTitle}>📋 Yapılacaklar</Text>
+                                {pendingTasks.map((task, index) => (
+                                    <TaskCard
+                                        key={task.id}
+                                        index={index}
+                                        task={task}
+                                        onComplete={() => handleTaskComplete(task.id)}
+                                        onPress={() => router.push('/(tabs)/tasks')}
+                                    />
+                                ))}
+                            </View>
+                        )}
 
-                {/* Completed Tasks */}
-                {completedTasks.length > 0 && (
-                    <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>✅ Tamamlananlar</Text>
-                        {completedTasks.map((task) => (
-                            <TaskCard
-                                key={task.id}
-                                task={task}
-                                onPress={() => { }}
-                            />
-                        ))}
-                    </View>
+                        {/* Completed Tasks */}
+                        {completedTasks.length > 0 && (
+                            <View style={styles.section}>
+                                <Text style={styles.sectionTitle}>✅ Tamamlananlar</Text>
+                                {completedTasks.map((task, index) => (
+                                    <TaskCard
+                                        key={task.id}
+                                        index={index}
+                                        task={task}
+                                        onPress={() => router.push('/(tabs)/tasks')}
+                                    />
+                                ))}
+                            </View>
+                        )}
+
+                        {/* Empty State */}
+                        {displayTasks.length === 0 && !isLoading && (
+                            <View style={styles.emptyState}>
+                                <Text style={styles.emptyEmoji}>🎉</Text>
+                                <Text style={styles.emptyTitle}>Görev yok!</Text>
+                                <Text style={styles.emptySubtitle}>Yeni görev ekleyerek başla</Text>
+                            </View>
+                        )}
+                    </>
                 )}
 
                 {/* Quick Actions */}
                 <View style={styles.quickActions}>
                     <Button
                         title="+ Yeni Görev"
-                        onPress={() => { }}
+                        onPress={() => router.push('/(tabs)/tasks')}
                         variant="outline"
                         fullWidth
                     />
                     <View style={styles.actionGap} />
                     <Button
                         title="🎯 Odaklanmaya Başla"
-                        onPress={() => { }}
+                        onPress={() => router.push('/(tabs)/focus')}
                         variant="primary"
                         fullWidth
                     />
                 </View>
             </ScrollView>
+
+            {/* Confetti Overlay */}
+            {showConfetti && (
+                <View style={StyleSheet.absoluteFill} pointerEvents="none">
+                    <Confetti
+                        x={confettiCoords.x}
+                        y={confettiCoords.y}
+                        count={50}
+                        onAnimationComplete={() => setShowConfetti(false)}
+                    />
+                </View>
+            )}
         </SafeAreaView>
     );
 }
@@ -243,6 +276,27 @@ const styles = StyleSheet.create({
     },
     aiButton: {
         alignSelf: 'flex-start',
+    },
+    loadingState: {
+        paddingVertical: 40,
+        alignItems: 'center',
+    },
+    emptyState: {
+        alignItems: 'center',
+        paddingVertical: 40,
+    },
+    emptyEmoji: {
+        fontSize: 48,
+    },
+    emptyTitle: {
+        fontSize: theme.fontSize.lg,
+        fontWeight: theme.fontWeight.bold,
+        color: theme.colors.gray800,
+        marginTop: theme.spacing.md,
+    },
+    emptySubtitle: {
+        fontSize: theme.fontSize.sm,
+        color: theme.colors.gray500,
     },
     quickActions: {
         marginTop: theme.spacing.xl,

@@ -30,15 +30,16 @@ router.post('/', auth, async (req, res, next) => {
 router.get('/history', auth, async (req, res, next) => {
     try {
         const { days } = req.query;
-        const daysNum = parseInt(days) || 7;
+        // Clamp days to a safe range (1-365)
+        const daysNum = Math.min(Math.max(parseInt(days) || 7, 1), 365);
 
         const result = await db.query(
             `SELECT DATE(logged_at) as date, AVG(energy_level) as avg_level
        FROM energy_logs
-       WHERE user_id = $1 AND logged_at >= NOW() - INTERVAL '${daysNum} days'
+       WHERE user_id = $1 AND logged_at >= NOW() - ($2 || ' days')::interval
        GROUP BY DATE(logged_at)
        ORDER BY date DESC`,
-            [req.user.id]
+            [req.user.id, daysNum.toString()]
         );
 
         res.json(result.rows);
