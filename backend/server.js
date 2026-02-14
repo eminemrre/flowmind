@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
+const logger = require('./utils/logger');
 
 // Routes
 const authRoutes = require('./routes/auth');
@@ -23,7 +24,13 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '1mb' }));
 
-// Simple in-memory rate limiting (no extra dependency needed)
+// Logging Middleware
+app.use((req, res, next) => {
+    logger.http(`${req.method} ${req.url} - ${req.ip}`);
+    next();
+});
+
+// Simple in-memory rate limiting (improved logging)
 const rateLimitMap = new Map();
 const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
 const RATE_LIMIT_MAX = 100; // max requests per window
@@ -46,6 +53,7 @@ const rateLimit = (req, res, next) => {
 
     entry.count++;
     if (entry.count > RATE_LIMIT_MAX) {
+        logger.warn(`Rate limit exceeded for IP: ${ip}`);
         return res.status(429).json({ message: 'Too many requests. Try again later.' });
     }
 
@@ -75,6 +83,7 @@ const authRateLimit = (req, res, next) => {
 
     entry.count++;
     if (entry.count > AUTH_RATE_LIMIT_MAX) {
+        logger.warn(`Auth rate limit exceeded for IP: ${ip}`);
         return res.status(429).json({ message: 'Too many auth attempts. Try again later.' });
     }
 
@@ -110,7 +119,9 @@ app.use('/api/recurring', recurringRoutes);
 
 // Error handling
 app.use((err, req, res, next) => {
-    console.error(err.stack);
+    logger.error(`${err.status || 500} - ${err.message} - ${req.originalUrl} - ${req.method} - ${req.ip}`);
+    if (err.stack) logger.debug(err.stack);
+
     res.status(err.status || 500).json({
         message: err.message || 'Internal Server Error',
         ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
@@ -125,8 +136,32 @@ app.use((req, res) => {
 // Export app for testing
 if (require.main === module) {
     const PORT = process.env.PORT || 3000;
-    app.listen(PORT, () => {
-        console.log(`🚀 FlowMind API running on port ${PORT}`);
+    const server = app.listen(PORT, () => {
+        logger.info(`🚀 FlowMind API running on port ${PORT}`);
+    });
+
+    // Graceful Shutdown
+    const shutdown = (signal) => {
+        logger.info(`${signal} signal received: closing HTTP server`);
+        server.close(async () => {
+            logger.info('HTTP server closed');
+            // If DB connection needs closing, do it here
+            // await pool.end();
+            process.exit(0);
+        });
+    };
+
+    process.on('SIGTERM', () => shutdown('SIGTERM'));
+    process.on('SIGINT', () => shutdown('SIGINT'));
+
+    process.on('uncaughtException', (err) => {
+        logger.error('Uncaught Exception:', err);
+        process.exit(1);
+    });
+
+    process.on('unhandledRejection', (reason, promise) => {
+        logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
+        process.exit(1);
     });
 }
 
