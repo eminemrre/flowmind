@@ -88,7 +88,7 @@ to help users choose the right task at the right time.
 ### 1) Clone and install
 
 ```bash
-git clone https://github.com/eminemre35/flowmind.git
+git clone https://github.com/eminemrre/flowmind.git
 cd flowmind
 npm install --legacy-peer-deps
 ```

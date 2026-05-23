@@ -17,11 +17,7 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.flowmind.app",
-      "infoPlist": {
-        "NSHealthShareUsageDescription": "FlowMind uses your health data to optimize your productivity schedule.",
-        "NSHealthUpdateUsageDescription": "FlowMind syncs your focus sessions with Apple Health."
-      }
+      "bundleIdentifier": "com.flowmind.app"
     },
     "android": {
       "adaptiveIcon": {
@@ -45,9 +41,6 @@
     "extra": {
       "router": {
         "origin": false
-      },
-      "eas": {
-        "projectId": "your-project-id"
       }
     }
   }

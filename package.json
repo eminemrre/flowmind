@@ -23,10 +23,10 @@
     "llm"
   ],
   "author": "Emin Emre <emin3619@gmail.com>",
-  "homepage": "https://github.com/eminemre35/flowmind#readme",
+  "homepage": "https://github.com/eminemrre/flowmind#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/eminemre35/flowmind.git"
+    "url": "git+https://github.com/eminemrre/flowmind.git"
   },
   "license": "MIT",
   "type": "commonjs",
