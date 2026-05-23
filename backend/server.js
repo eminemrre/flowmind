@@ -12,7 +12,6 @@ const statsRoutes = require('./routes/stats');
 const energyRoutes = require('./routes/energy');
 const preferencesRoutes = require('./routes/preferences');
 const achievementsRoutes = require('./routes/achievements');
-const recurringRoutes = require('./routes/recurring');
 
 const app = express();
 
@@ -115,7 +114,6 @@ app.use('/api/stats', statsRoutes);
 app.use('/api/energy', energyRoutes);
 app.use('/api/preferences', preferencesRoutes);
 app.use('/api/achievements', achievementsRoutes);
-app.use('/api/recurring', recurringRoutes);
 
 // Error handling
 app.use((err, req, res, next) => {
