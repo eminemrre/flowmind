@@ -65,3 +65,4 @@ coverage/
 # Logs
 logs/
 *.log
+expo-qr.png
