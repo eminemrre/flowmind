@@ -54,7 +54,7 @@ class AIService {
                 throw new Error(`API Hatası: ${response.status}`);
             }
 
-            const data: OpenRouterResponse = await response.json();
+            const data = (await response.json()) as OpenRouterResponse;
             return data.choices[0]?.message?.content || this.getFallbackResponse();
         } catch (error) {
             console.error('AI Servis Hatası:', error);

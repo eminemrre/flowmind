@@ -31,11 +31,11 @@ class ApiClient {
             });
 
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
+                const errorData = (await response.json().catch(() => ({}))) as { message?: string };
                 return { data: null, error: errorData.message || `HTTP ${response.status}` };
             }
 
-            const data = await response.json();
+            const data = (await response.json()) as T;
             return { data, error: null };
         } catch (error) {
             return { data: null, error: (error as Error).message };
