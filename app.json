@@ -17,14 +17,20 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.flowmind.app"
+      "bundleIdentifier": "com.eminemre.flowmind",
+      "config": {
+        "usesNonExemptEncryption": false
+      },
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#6366F1"
       },
-      "package": "com.flowmind.app"
+      "package": "com.eminemre.flowmind"
     },
     "web": {
       "bundler": "metro",
