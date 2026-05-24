@@ -119,7 +119,7 @@ export default function FocusScreen() {
 
     // Timer countdown
     useEffect(() => {
-        let interval: NodeJS.Timeout;
+        let interval: ReturnType<typeof setInterval> | undefined;
 
         if (timerState === 'running' && timeLeft > 0) {
             interval = setInterval(() => {
@@ -129,7 +129,9 @@ export default function FocusScreen() {
             handleTimerComplete();
         }
 
-        return () => clearInterval(interval);
+        return () => {
+            if (interval) clearInterval(interval);
+        };
     }, [timerState, timeLeft]);
 
     const handleTimerComplete = async () => {
