@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, SafeAreaView, KeyboardAvoidingView, Platform, TouchableOpacity, Alert } from 'react-native';
-import { Link, router } from 'expo-router';
+import { View, Text, TextInput, StyleSheet, SafeAreaView, KeyboardAvoidingView, Platform, TouchableOpacity, Pressable, Alert, ScrollView } from 'react-native';
+import { router } from 'expo-router';
 import { theme } from '@/constants/theme';
 import { Button } from '@/components/ui/Button';
 import { useAuthStore } from '@/stores/authStore';
@@ -39,7 +39,11 @@ export default function LoginScreen() {
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={styles.keyboardView}
             >
-                <View style={styles.content}>
+                <ScrollView
+                    contentContainerStyle={styles.scrollContent}
+                    keyboardShouldPersistTaps="handled"
+                    showsVerticalScrollIndicator={false}
+                >
                     {/* Logo */}
                     <View style={styles.logoContainer}>
                         <Text style={styles.logo}>🧠</Text>
@@ -82,6 +86,16 @@ export default function LoginScreen() {
                             fullWidth
                             size="lg"
                         />
+
+                        {/* Register CTA — form içinde, Login butonunun hemen altında */}
+                        <Pressable
+                            onPress={() => router.push('/(auth)/register')}
+                            style={({ pressed }) => [styles.registerCta, pressed && styles.registerCtaPressed]}
+                        >
+                            <Text style={styles.registerCtaText}>
+                                Hesabın yok mu? <Text style={styles.registerCtaTextBold}>Kayıt Ol</Text>
+                            </Text>
+                        </Pressable>
                     </View>
 
                     {/* Divider */}
@@ -98,17 +112,7 @@ export default function LoginScreen() {
                         variant="secondary"
                         fullWidth
                     />
-
-                    {/* Register Link */}
-                    <View style={styles.registerContainer}>
-                        <Text style={styles.registerText}>Hesabın yok mu? </Text>
-                        <Link href="/(auth)/register" asChild>
-                            <TouchableOpacity>
-                                <Text style={styles.registerLink}>Kayıt Ol</Text>
-                            </TouchableOpacity>
-                        </Link>
-                    </View>
-                </View>
+                </ScrollView>
             </KeyboardAvoidingView>
         </SafeAreaView>
     );
@@ -118,6 +122,7 @@ const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: theme.colors.background },
     keyboardView: { flex: 1 },
     content: { flex: 1, padding: theme.spacing.xl, justifyContent: 'center' },
+    scrollContent: { flexGrow: 1, padding: theme.spacing.xl, justifyContent: 'center' },
     logoContainer: { alignItems: 'center', marginBottom: theme.spacing['3xl'] },
     logo: { fontSize: 64, marginBottom: theme.spacing.md },
     appName: { fontSize: theme.fontSize['3xl'], fontWeight: theme.fontWeight.bold, color: theme.colors.gray900 },
@@ -130,7 +135,8 @@ const styles = StyleSheet.create({
     divider: { flexDirection: 'row', alignItems: 'center', marginVertical: theme.spacing.xl },
     dividerLine: { flex: 1, height: 1, backgroundColor: theme.colors.gray200 },
     dividerText: { paddingHorizontal: theme.spacing.md, color: theme.colors.gray400, fontSize: theme.fontSize.sm },
-    registerContainer: { flexDirection: 'row', justifyContent: 'center', marginTop: theme.spacing.xl },
-    registerText: { color: theme.colors.gray500 },
-    registerLink: { color: theme.colors.primary, fontWeight: theme.fontWeight.semibold },
+    registerCta: { marginTop: theme.spacing.md, minHeight: 48, alignItems: 'center', justifyContent: 'center', paddingVertical: theme.spacing.md, paddingHorizontal: theme.spacing.base, borderRadius: theme.borderRadius.lg, backgroundColor: theme.colors.gray50, borderWidth: 1, borderColor: theme.colors.gray200 },
+    registerCtaPressed: { opacity: 0.6, backgroundColor: theme.colors.gray100 },
+    registerCtaText: { fontSize: theme.fontSize.base, color: theme.colors.gray700, textAlign: 'center' },
+    registerCtaTextBold: { color: theme.colors.primary, fontWeight: theme.fontWeight.semibold },
 });

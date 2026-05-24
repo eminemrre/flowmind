@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, SafeAreaView, KeyboardAvoidingView, Platform, TouchableOpacity, Alert } from 'react-native';
-import { Link, router } from 'expo-router';
+import { View, Text, TextInput, StyleSheet, SafeAreaView, KeyboardAvoidingView, Platform, Pressable, Alert } from 'react-native';
+import { router } from 'expo-router';
 import { theme } from '@/constants/theme';
 import { Button } from '@/components/ui/Button';
 import { useAuthStore } from '@/stores/authStore';
@@ -60,12 +60,14 @@ export default function RegisterScreen() {
                         <Button title="Kayıt Ol" onPress={handleRegister} loading={loading} fullWidth size="lg" style={styles.button} />
                     </View>
 
-                    <View style={styles.loginContainer}>
-                        <Text style={styles.loginText}>Zaten hesabın var mı? </Text>
-                        <Link href="/(auth)/login" asChild>
-                            <TouchableOpacity><Text style={styles.loginLink}>Giriş Yap</Text></TouchableOpacity>
-                        </Link>
-                    </View>
+                    <Pressable
+                        onPress={() => router.push('/(auth)/login')}
+                        style={({ pressed }) => [styles.loginCta, pressed && styles.loginCtaPressed]}
+                    >
+                        <Text style={styles.loginCtaText}>
+                            Zaten hesabın var mı? <Text style={styles.loginCtaTextBold}>Giriş Yap</Text>
+                        </Text>
+                    </Pressable>
                 </View>
             </KeyboardAvoidingView>
         </SafeAreaView>
@@ -83,7 +85,8 @@ const styles = StyleSheet.create({
     label: { fontSize: theme.fontSize.sm, fontWeight: theme.fontWeight.medium, color: theme.colors.gray700, marginBottom: theme.spacing.xs },
     input: { backgroundColor: theme.colors.gray50, borderWidth: 1, borderColor: theme.colors.gray200, borderRadius: theme.borderRadius.lg, padding: theme.spacing.base, fontSize: theme.fontSize.base, marginBottom: theme.spacing.base, color: theme.colors.gray900 },
     button: { marginTop: theme.spacing.md },
-    loginContainer: { flexDirection: 'row', justifyContent: 'center' },
-    loginText: { color: theme.colors.gray500 },
-    loginLink: { color: theme.colors.primary, fontWeight: theme.fontWeight.semibold },
+    loginCta: { marginTop: theme.spacing.md, minHeight: 48, alignItems: 'center', justifyContent: 'center', paddingVertical: theme.spacing.md, paddingHorizontal: theme.spacing.base, borderRadius: theme.borderRadius.lg, backgroundColor: theme.colors.gray50, borderWidth: 1, borderColor: theme.colors.gray200 },
+    loginCtaPressed: { opacity: 0.6, backgroundColor: theme.colors.gray100 },
+    loginCtaText: { fontSize: theme.fontSize.base, color: theme.colors.gray700, textAlign: 'center' },
+    loginCtaTextBold: { color: theme.colors.primary, fontWeight: theme.fontWeight.semibold },
 });
