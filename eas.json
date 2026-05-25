@@ -18,6 +18,7 @@
       }
     },
     "production": {
+      "autoIncrement": "buildNumber",
       "ios": {
         "resourceClass": "m-medium"
       },
