@@ -13,6 +13,7 @@ const energyRoutes = require('./routes/energy');
 const preferencesRoutes = require('./routes/preferences');
 const achievementsRoutes = require('./routes/achievements');
 const legalRoutes = require('./routes/legal');
+const aiRoutes = require('./routes/ai');
 
 const app = express();
 
@@ -115,6 +116,7 @@ app.use('/api/stats', statsRoutes);
 app.use('/api/energy', energyRoutes);
 app.use('/api/preferences', preferencesRoutes);
 app.use('/api/achievements', achievementsRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Legal / Support pages (public, no /api prefix — these are App Store-facing URLs)
 app.use('/', legalRoutes);

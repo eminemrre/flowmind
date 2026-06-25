@@ -42,6 +42,17 @@ class ApiClient {
         }
     }
 
+    // ============ AI ============
+    async aiChat(
+        messages: { role: string; content: string }[],
+        opts?: { max_tokens?: number; temperature?: number }
+    ) {
+        return this.request<{ content: string }>('/ai/chat', {
+            method: 'POST',
+            body: JSON.stringify({ messages, ...opts }),
+        });
+    }
+
     // ============ AUTH ============
     async login(email: string, password: string) {
         return this.request<{ user: User; token: string }>('/auth/login', {
