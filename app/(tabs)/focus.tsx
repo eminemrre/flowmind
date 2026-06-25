@@ -4,11 +4,12 @@ import {
     Text,
     StyleSheet,
     SafeAreaView,
-    TouchableOpacity,
+    Pressable,
     Alert,
     AppState,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
     useSharedValue,
     useAnimatedStyle,
@@ -17,16 +18,16 @@ import Animated, {
     withTiming,
     withSpring,
     Easing,
-    cancelAnimation
+    cancelAnimation,
 } from 'react-native-reanimated';
 
 import { config } from '@/constants/config';
 import { apiClient } from '@/lib/api';
 import { useAuthStore } from '@/stores/authStore';
 import { useTaskStore } from '@/stores/taskStore';
-import { useTheme } from '@/components/ThemeProvider';
-import { useThemedStyles } from '@/hooks/useThemedStyles';
-import { Theme } from '@/constants/theme';
+import { palette, theme } from '@/constants/theme';
+import { GlassCard } from '@/components/ui/GlassCard';
+import { GlowOrb } from '@/components/ui/GlowOrb';
 import {
     saveTimerState,
     loadTimerState,
@@ -49,34 +50,30 @@ export default function FocusScreen() {
 
     const { addXp } = useAuthStore();
     const { tasks } = useTaskStore();
-    const activeTasks = tasks.filter(t => !t.isCompleted);
+    const activeTasks = tasks.filter((t) => !t.isCompleted);
 
     const pulseAnim = useSharedValue(1);
+    const orbAnim = useSharedValue(0.6);
     const appState = useRef(AppState.currentState);
     const timerNotifId = useRef<string | null>(null);
 
-    // Register background task on mount
     useEffect(() => {
         registerBackgroundTimer();
     }, []);
 
-    // AppState listener — save/restore timer on background/foreground
     useEffect(() => {
         const sub = AppState.addEventListener('change', async (nextAppState) => {
             if (appState.current === 'active' && nextAppState.match(/inactive|background/)) {
-                // Going to background — save timer state
                 if (timerState === 'running' && timeLeft > 0) {
                     await saveTimerState({
                         endTime: Date.now() + timeLeft * 1000,
                         isBreak,
                         sessionMinutes: config.app.defaultPomodoroMinutes,
                     });
-                    // Schedule notification for timer end
                     const nId = await scheduleTimerEndNotification(timeLeft, isBreak);
                     timerNotifId.current = nId;
                 }
             } else if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
-                // Coming to foreground — restore timer
                 const saved = await loadTimerState();
                 if (saved) {
                     const remaining = getRemainingSeconds(saved);
@@ -84,12 +81,10 @@ export default function FocusScreen() {
                         setTimeLeft(remaining);
                         setIsBreak(saved.isBreak);
                     } else {
-                        // Timer completed while in background
                         handleTimerComplete();
                     }
                     await clearTimerState();
                 }
-                // Cancel scheduled notification
                 if (timerNotifId.current) {
                     await cancelTimerNotification(timerNotifId.current);
                     timerNotifId.current = null;
@@ -100,30 +95,39 @@ export default function FocusScreen() {
         return () => sub.remove();
     }, [timerState, timeLeft, isBreak]);
 
-    // Animation for timer
+    // Breathing pulse + orb shimmer
     useEffect(() => {
         if (timerState === 'running') {
             pulseAnim.value = withRepeat(
                 withSequence(
-                    withTiming(1.05, { duration: 1000, easing: Easing.inOut(Easing.ease) }),
-                    withTiming(1, { duration: 1000, easing: Easing.inOut(Easing.ease) })
+                    withTiming(1.04, { duration: 1200, easing: Easing.inOut(Easing.ease) }),
+                    withTiming(1, { duration: 1200, easing: Easing.inOut(Easing.ease) })
                 ),
-                -1, // Infinite repeat
-                true // Reverse
+                -1,
+                true
+            );
+            orbAnim.value = withRepeat(
+                withSequence(
+                    withTiming(0.85, { duration: 2200, easing: Easing.inOut(Easing.ease) }),
+                    withTiming(0.5, { duration: 2200, easing: Easing.inOut(Easing.ease) })
+                ),
+                -1,
+                true
             );
         } else {
             cancelAnimation(pulseAnim);
+            cancelAnimation(orbAnim);
             pulseAnim.value = withSpring(1);
+            orbAnim.value = withTiming(0.4, { duration: 600 });
         }
     }, [timerState]);
 
-    // Timer countdown
     useEffect(() => {
         let interval: ReturnType<typeof setInterval> | undefined;
 
         if (timerState === 'running' && timeLeft > 0) {
             interval = setInterval(() => {
-                setTimeLeft(prev => prev - 1);
+                setTimeLeft((prev) => prev - 1);
             }, 1000);
         } else if (timeLeft === 0) {
             handleTimerComplete();
@@ -136,17 +140,14 @@ export default function FocusScreen() {
 
     const handleTimerComplete = async () => {
         if (isBreak) {
-            // Break finished, start new session
             setIsBreak(false);
             setTimeLeft(config.app.defaultPomodoroMinutes * 60);
             setTimerState('idle');
         } else {
-            // Work session finished - save to backend
             const sessionMinutes = config.app.defaultPomodoroMinutes;
-            setSessionsCompleted(prev => prev + 1);
-            setTotalMinutes(prev => prev + sessionMinutes);
+            setSessionsCompleted((prev) => prev + 1);
+            setTotalMinutes((prev) => prev + sessionMinutes);
 
-            // End session on backend
             if (currentSessionId) {
                 try {
                     await apiClient.endFocusSession(currentSessionId, true);
@@ -154,7 +155,6 @@ export default function FocusScreen() {
                 setCurrentSessionId(null);
             }
 
-            // Add XP locally (backend handles XP too)
             addXp(config.xp.focusSessionComplete);
 
             const isLongBreak = (sessionsCompleted + 1) % config.app.sessionsUntilLongBreak === 0;
@@ -168,15 +168,13 @@ export default function FocusScreen() {
 
     const startTimer = async () => {
         setTimerState('running');
-
-        // Start session on backend
         if (!isBreak) {
             try {
                 const { data } = await apiClient.startFocusSession();
                 if (data) {
                     setCurrentSessionId((data as any).id?.toString());
                 }
-            } catch { /* silent - timer still works locally */ }
+            } catch { /* silent */ }
         }
     };
 
@@ -184,21 +182,17 @@ export default function FocusScreen() {
     const resumeTimer = () => setTimerState('running');
 
     const resetTimer = async () => {
-        // End incomplete session on backend
         if (currentSessionId) {
             try {
                 await apiClient.endFocusSession(currentSessionId, false);
             } catch { /* silent */ }
             setCurrentSessionId(null);
         }
-
-        // Clear background state
         await clearTimerState();
         if (timerNotifId.current) {
             await cancelTimerNotification(timerNotifId.current);
             timerNotifId.current = null;
         }
-
         setTimerState('idle');
         setIsBreak(false);
         setTimeLeft(config.app.defaultPomodoroMinutes * 60);
@@ -211,249 +205,349 @@ export default function FocusScreen() {
     };
 
     const progress = isBreak
-        ? 1 - (timeLeft / (config.app.defaultBreakMinutes * 60))
-        : 1 - (timeLeft / (config.app.defaultPomodoroMinutes * 60));
-
-    const { theme } = useTheme();
-    const styles = useThemedStyles(createStyles);
+        ? 1 - timeLeft / (config.app.defaultBreakMinutes * 60)
+        : 1 - timeLeft / (config.app.defaultPomodoroMinutes * 60);
 
     const animatedStyle = useAnimatedStyle(() => ({
-        transform: [{ scale: pulseAnim.value }]
+        transform: [{ scale: pulseAnim.value }],
     }));
 
-    return (
-        <SafeAreaView style={styles.container}>
-            <View style={styles.content}>
-                {/* Session info */}
-                <View style={styles.sessionInfo}>
-                    <Text style={styles.sessionText}>
-                        {isBreak ? '☕ Mola Zamanı' : '💻 Odaklanma Modu'}
-                    </Text>
-                    <Text style={styles.sessionCount}>
-                        Oturum {sessionsCompleted + 1}/4
-                    </Text>
-                </View>
+    const animatedOrbStyle = useAnimatedStyle(() => ({
+        opacity: orbAnim.value,
+    }));
 
-                {/* Timer Circle */}
-                <Animated.View
-                    style={[
-                        styles.timerContainer,
-                        animatedStyle
-                    ]}
-                >
-                    <View style={[
-                        styles.timerCircle,
-                        isBreak && styles.timerCircleBreak,
-                    ]}>
-                        <Text style={styles.timerText}>{formatTime(timeLeft)}</Text>
-                        <Text style={styles.timerLabel}>
-                            {isBreak ? 'Dinlen' : 'Odaklan'}
+    const gradientColors = isBreak ? theme.gradients.success : theme.gradients.brand;
+
+    return (
+        <View style={styles.root}>
+            <LinearGradient
+                colors={[palette.bgDeep, palette.bg]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 0, y: 1 }}
+                style={StyleSheet.absoluteFill}
+            />
+            <Animated.View style={[styles.orbWrap, animatedOrbStyle]}>
+                <GlowOrb
+                    color={isBreak ? 'cyan' : 'indigo'}
+                    size={500}
+                    opacity={1}
+                    style={{ top: -150, left: -100 }}
+                />
+                <GlowOrb
+                    color={isBreak ? 'cyan' : 'pink'}
+                    size={400}
+                    opacity={1}
+                    style={{ bottom: -100, right: -100 }}
+                />
+            </Animated.View>
+
+            <SafeAreaView style={styles.safe}>
+                <View style={styles.content}>
+                    {/* Session info */}
+                    <View style={styles.sessionInfo}>
+                        <Text style={styles.sessionMode}>
+                            {isBreak ? 'Mola Zamanı' : 'Odaklanma Modu'}
+                        </Text>
+                        <Text style={styles.sessionCount}>
+                            Oturum {sessionsCompleted + 1} / 4
                         </Text>
                     </View>
 
-                    {/* Progress ring */}
-                    <View style={[
-                        styles.progressRing,
-                        {
-                            borderColor: isBreak ? theme.colors.success : theme.colors.primary,
-                            opacity: progress,
-                        }
-                    ]} />
-                </Animated.View>
+                    {/* Timer Circle with gradient ring */}
+                    <Animated.View style={[styles.timerWrapper, animatedStyle]}>
+                        {/* Gradient progress ring (full) */}
+                        <LinearGradient
+                            colors={gradientColors}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 1 }}
+                            style={styles.ringOuter}
+                        >
+                            <View style={styles.ringInner} />
+                        </LinearGradient>
 
-                {/* Controls */}
-                <View style={styles.controls}>
-                    {timerState === 'idle' && (
-                        <TouchableOpacity style={styles.playButton} onPress={startTimer}>
-                            <Ionicons name="play" size={40} color="#fff" />
-                        </TouchableOpacity>
-                    )}
-
-                    {timerState === 'running' && (
-                        <TouchableOpacity style={styles.pauseButton} onPress={pauseTimer}>
-                            <Ionicons name="pause" size={40} color="#fff" />
-                        </TouchableOpacity>
-                    )}
-
-                    {timerState === 'paused' && (
-                        <View style={styles.pausedControls}>
-                            <TouchableOpacity style={styles.resetButton} onPress={resetTimer}>
-                                <Ionicons name="refresh" size={28} color={theme.colors.textSecondary} />
-                            </TouchableOpacity>
-                            <TouchableOpacity style={styles.playButton} onPress={resumeTimer}>
-                                <Ionicons name="play" size={40} color="#fff" />
-                            </TouchableOpacity>
-                            <View style={styles.placeholder} />
+                        {/* Inner dark circle with time */}
+                        <View style={styles.timerInner}>
+                            <Text style={styles.timerText}>{formatTime(timeLeft)}</Text>
+                            <Text style={styles.timerLabel}>
+                                {isBreak ? 'Dinlen' : 'Odaklan'}
+                            </Text>
+                            <View style={styles.progressBarOuter}>
+                                <LinearGradient
+                                    colors={gradientColors}
+                                    start={{ x: 0, y: 0 }}
+                                    end={{ x: 1, y: 0 }}
+                                    style={[styles.progressBarFill, { width: `${progress * 100}%` }]}
+                                />
+                            </View>
                         </View>
-                    )}
-                </View>
+                    </Animated.View>
 
-                {/* Stats */}
-                <View style={styles.stats}>
-                    <View style={styles.statItem}>
-                        <Text style={styles.statValue}>{sessionsCompleted}</Text>
-                        <Text style={styles.statLabel}>Tamamlanan</Text>
-                    </View>
-                    <View style={styles.statDivider} />
-                    <View style={styles.statItem}>
-                        <Text style={styles.statValue}>{totalMinutes}</Text>
-                        <Text style={styles.statLabel}>Dakika</Text>
-                    </View>
-                    <View style={styles.statDivider} />
-                    <View style={styles.statItem}>
-                        <Text style={styles.statValue}>+{sessionsCompleted * config.xp.focusSessionComplete}</Text>
-                        <Text style={styles.statLabel}>XP</Text>
-                    </View>
-                </View>
+                    {/* Controls */}
+                    <View style={styles.controls}>
+                        {timerState === 'idle' && (
+                            <Pressable
+                                onPress={startTimer}
+                                style={({ pressed }) => [styles.mainBtnShadow, pressed && styles.btnPressed]}
+                            >
+                                <LinearGradient
+                                    colors={gradientColors}
+                                    start={{ x: 0, y: 0 }}
+                                    end={{ x: 1, y: 1 }}
+                                    style={styles.mainBtn}
+                                >
+                                    <Ionicons name="play" size={36} color="#fff" />
+                                </LinearGradient>
+                            </Pressable>
+                        )}
 
-                {/* Current task indicator */}
-                <View style={styles.currentTask}>
-                    <Ionicons name="bookmark-outline" size={16} color={theme.colors.textSecondary} />
-                    <Text style={styles.currentTaskText}>
-                        {activeTasks.length > 0
-                            ? `📌 ${activeTasks[0].title}`
-                            : 'Görev seçilmedi - Genel odaklanma'
-                        }
-                    </Text>
+                        {timerState === 'running' && (
+                            <Pressable
+                                onPress={pauseTimer}
+                                style={({ pressed }) => [styles.mainBtnShadow, pressed && styles.btnPressed]}
+                            >
+                                <LinearGradient
+                                    colors={theme.gradients.sunset}
+                                    start={{ x: 0, y: 0 }}
+                                    end={{ x: 1, y: 1 }}
+                                    style={styles.mainBtn}
+                                >
+                                    <Ionicons name="pause" size={36} color="#fff" />
+                                </LinearGradient>
+                            </Pressable>
+                        )}
+
+                        {timerState === 'paused' && (
+                            <View style={styles.pausedControls}>
+                                <Pressable onPress={resetTimer} style={styles.secondaryBtn}>
+                                    <Ionicons name="refresh" size={26} color={palette.textSecondary} />
+                                </Pressable>
+                                <Pressable
+                                    onPress={resumeTimer}
+                                    style={({ pressed }) => [styles.mainBtnShadow, pressed && styles.btnPressed]}
+                                >
+                                    <LinearGradient
+                                        colors={gradientColors}
+                                        start={{ x: 0, y: 0 }}
+                                        end={{ x: 1, y: 1 }}
+                                        style={styles.mainBtn}
+                                    >
+                                        <Ionicons name="play" size={36} color="#fff" />
+                                    </LinearGradient>
+                                </Pressable>
+                                <View style={styles.btnPlaceholder} />
+                            </View>
+                        )}
+                    </View>
+
+                    {/* Stats card */}
+                    <GlassCard padding="lg" style={styles.statsCard}>
+                        <View style={styles.statsRow}>
+                            <View style={styles.statItem}>
+                                <Text style={styles.statValue}>{sessionsCompleted}</Text>
+                                <Text style={styles.statLabel}>Oturum</Text>
+                            </View>
+                            <View style={styles.statDivider} />
+                            <View style={styles.statItem}>
+                                <Text style={styles.statValue}>{totalMinutes}</Text>
+                                <Text style={styles.statLabel}>Dakika</Text>
+                            </View>
+                            <View style={styles.statDivider} />
+                            <View style={styles.statItem}>
+                                <Text style={styles.statValue}>
+                                    +{sessionsCompleted * config.xp.focusSessionComplete}
+                                </Text>
+                                <Text style={styles.statLabel}>XP</Text>
+                            </View>
+                        </View>
+                    </GlassCard>
+
+                    {/* Current task indicator */}
+                    <View style={styles.currentTask}>
+                        <Ionicons name="bookmark" size={14} color={palette.primaryLight} />
+                        <Text style={styles.currentTaskText} numberOfLines={1}>
+                            {activeTasks.length > 0 ? activeTasks[0].title : 'Görev seçilmedi'}
+                        </Text>
+                    </View>
                 </View>
-            </View>
-        </SafeAreaView>
+            </SafeAreaView>
+        </View>
     );
 }
 
-const createStyles = (theme: Theme) => StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: theme.colors.background,
-    },
+const RING_SIZE = 300;
+const RING_INNER = 280;
+const RING_BORDER = (RING_SIZE - RING_INNER) / 2;
+
+const styles = StyleSheet.create({
+    root: { flex: 1, backgroundColor: palette.bg },
+    safe: { flex: 1 },
+    orbWrap: { ...StyleSheet.absoluteFillObject },
     content: {
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
-        padding: theme.spacing.xl,
+        paddingHorizontal: theme.spacing.xl,
+        paddingBottom: theme.spacing['3xl'],
     },
     sessionInfo: {
         alignItems: 'center',
-        marginBottom: theme.spacing['3xl'],
+        marginBottom: theme.spacing['2xl'],
     },
-    sessionText: {
-        fontSize: theme.fontSize.xl,
+    sessionMode: {
+        fontSize: theme.fontSize.lg,
         fontWeight: theme.fontWeight.semibold,
-        color: theme.colors.text,
+        color: palette.textPrimary,
+        letterSpacing: 0.5,
     },
     sessionCount: {
         fontSize: theme.fontSize.sm,
-        color: theme.colors.textSecondary,
-        marginTop: theme.spacing.xs,
+        color: palette.textMuted,
+        marginTop: 4,
+        letterSpacing: 0.5,
     },
-    timerContainer: {
-        position: 'relative',
-        marginBottom: theme.spacing['3xl'],
-    },
-    timerCircle: {
-        width: 260,
-        height: 260,
-        borderRadius: 130,
-        backgroundColor: theme.colors.card,
+    timerWrapper: {
+        width: RING_SIZE,
+        height: RING_SIZE,
+        marginBottom: theme.spacing['2xl'],
         alignItems: 'center',
         justifyContent: 'center',
-        ...theme.shadow.lg,
+        shadowColor: palette.primary,
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.7,
+        shadowRadius: 40,
+        elevation: 15,
     },
-    timerCircleBreak: {
-        backgroundColor: theme.colors.success + '15',
+    ringOuter: {
+        position: 'absolute',
+        width: RING_SIZE,
+        height: RING_SIZE,
+        borderRadius: RING_SIZE / 2,
+        padding: RING_BORDER,
+    },
+    ringInner: {
+        flex: 1,
+        backgroundColor: palette.bg,
+        borderRadius: RING_INNER / 2,
+    },
+    timerInner: {
+        width: RING_INNER - 12,
+        height: RING_INNER - 12,
+        borderRadius: (RING_INNER - 12) / 2,
+        backgroundColor: 'rgba(19, 19, 43, 0.85)',
+        borderWidth: 1,
+        borderColor: palette.glassBorder,
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: 24,
     },
     timerText: {
-        fontSize: 56,
+        fontSize: 64,
         fontWeight: theme.fontWeight.bold,
-        color: theme.colors.text,
+        color: palette.textPrimary,
         fontVariant: ['tabular-nums'],
+        letterSpacing: -1,
     },
     timerLabel: {
         fontSize: theme.fontSize.base,
-        color: theme.colors.textSecondary,
-        marginTop: theme.spacing.xs,
+        color: palette.textSecondary,
+        marginTop: 4,
+        letterSpacing: 1,
+        textTransform: 'uppercase',
     },
-    progressRing: {
-        position: 'absolute',
-        width: 280,
-        height: 280,
-        borderRadius: 140,
-        borderWidth: 4,
-        top: -10,
-        left: -10,
+    progressBarOuter: {
+        marginTop: theme.spacing.lg,
+        width: 140,
+        height: 4,
+        backgroundColor: palette.glass,
+        borderRadius: 2,
+        overflow: 'hidden',
+    },
+    progressBarFill: {
+        height: '100%',
+        borderRadius: 2,
     },
     controls: {
-        marginBottom: theme.spacing['3xl'],
+        marginBottom: theme.spacing.xl,
     },
-    playButton: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
-        backgroundColor: theme.colors.primary,
+    mainBtnShadow: {
+        shadowColor: palette.primary,
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.6,
+        shadowRadius: 20,
+        elevation: 12,
+        borderRadius: 44,
+    },
+    btnPressed: {
+        opacity: 0.9,
+        transform: [{ scale: 0.96 }],
+    },
+    mainBtn: {
+        width: 88,
+        height: 88,
+        borderRadius: 44,
         alignItems: 'center',
         justifyContent: 'center',
-        ...theme.shadow.md,
-    },
-    pauseButton: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
-        backgroundColor: theme.colors.warning,
-        alignItems: 'center',
-        justifyContent: 'center',
-        ...theme.shadow.md,
     },
     pausedControls: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: theme.spacing.xl,
     },
-    resetButton: {
+    secondaryBtn: {
         width: 56,
         height: 56,
         borderRadius: 28,
-        backgroundColor: theme.colors.surface,
+        backgroundColor: palette.glassStrong,
+        borderWidth: 1,
+        borderColor: palette.glassBorder,
         alignItems: 'center',
         justifyContent: 'center',
-        borderWidth: 1,
-        borderColor: theme.colors.border,
     },
-    placeholder: {
+    btnPlaceholder: {
         width: 56,
     },
-    stats: {
+    statsCard: {
+        width: '100%',
+        marginBottom: theme.spacing.base,
+    },
+    statsRow: {
         flexDirection: 'row',
-        backgroundColor: theme.colors.card,
-        borderRadius: theme.borderRadius.xl,
-        padding: theme.spacing.base,
-        ...theme.shadow.sm,
     },
     statItem: {
+        flex: 1,
         alignItems: 'center',
-        paddingHorizontal: theme.spacing.xl,
     },
     statValue: {
-        fontSize: theme.fontSize.xl,
+        fontSize: theme.fontSize['2xl'],
         fontWeight: theme.fontWeight.bold,
-        color: theme.colors.primary,
+        color: palette.primaryLight,
+        letterSpacing: -0.5,
     },
     statLabel: {
         fontSize: theme.fontSize.xs,
-        color: theme.colors.textSecondary,
-        marginTop: theme.spacing.xs,
+        color: palette.textMuted,
+        marginTop: 2,
+        letterSpacing: 0.5,
+        textTransform: 'uppercase',
     },
     statDivider: {
         width: 1,
-        backgroundColor: theme.colors.border,
+        backgroundColor: palette.glassBorder,
     },
     currentTask: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginTop: theme.spacing.xl,
         gap: theme.spacing.sm,
+        paddingHorizontal: theme.spacing.lg,
+        paddingVertical: theme.spacing.sm,
+        backgroundColor: palette.glass,
+        borderRadius: theme.borderRadius.full,
+        borderWidth: 1,
+        borderColor: palette.glassBorder,
     },
     currentTaskText: {
         fontSize: theme.fontSize.sm,
-        color: theme.colors.textSecondary,
+        color: palette.textSecondary,
+        maxWidth: 220,
     },
 });

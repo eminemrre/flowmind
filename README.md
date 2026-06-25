@@ -4,8 +4,8 @@
 
 **AI productivity coach that schedules work around your real energy patterns.**
 
-[![React Native](https://img.shields.io/badge/React%20Native-0.76-61DAFB?logo=react)](https://reactnative.dev/)
-[![Expo](https://img.shields.io/badge/Expo-SDK%2052-000020?logo=expo)](https://expo.dev/)
+[![React Native](https://img.shields.io/badge/React%20Native-0.81-61DAFB?logo=react)](https://reactnative.dev/)
+[![Expo](https://img.shields.io/badge/Expo-SDK%2054-000020?logo=expo)](https://expo.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178C6?logo=typescript)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=node.js)](https://nodejs.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-4169E1?logo=postgresql)](https://www.postgresql.org/)
@@ -53,8 +53,8 @@ to help users choose the right task at the right time.
 
 | Layer | Technology |
 |---|---|
-| Framework | React Native 0.76 |
-| Runtime | Expo SDK 52 |
+| Framework | React Native 0.81 |
+| Runtime | Expo SDK 54 |
 | Language | TypeScript 5.7 |
 | Navigation | Expo Router |
 | State | Zustand |

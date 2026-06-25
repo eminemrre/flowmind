@@ -11,8 +11,10 @@ import {
     Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 
 import { TaskCard } from '@/components/ui/TaskCard';
+import { GlowOrb } from '@/components/ui/GlowOrb';
 import { Confetti } from '@/components/ui/Confetti';
 import { EmptyState } from '@/components/ui/EmptyState';
 import TaskModal from '@/components/TaskModal';
@@ -21,7 +23,7 @@ import { Task } from '@/types';
 import { useTaskStore } from '@/stores/taskStore';
 import { useTheme } from '@/components/ThemeProvider';
 import { useThemedStyles } from '@/hooks/useThemedStyles';
-import { Theme } from '@/constants/theme';
+import { Theme, palette } from '@/constants/theme';
 import { VoiceTaskButton } from '@/components/VoiceTaskButton';
 
 export default function TasksScreen() {
@@ -123,6 +125,15 @@ export default function TasksScreen() {
 
     return (
         <SafeAreaView style={styles.container}>
+            <LinearGradient
+                colors={[palette.bgDeep, palette.bg, palette.bgElevated]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 0, y: 1 }}
+                style={StyleSheet.absoluteFill}
+                pointerEvents="none"
+            />
+            <GlowOrb color="indigo" size={400} opacity={0.22} style={{ top: -130, left: -110 }} />
+            <GlowOrb color="pink" size={300} opacity={0.16} style={{ bottom: -60, right: -90 }} />
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>Görevler</Text>
                 <TouchableOpacity style={styles.addButton} onPress={handleAddTask}>
@@ -292,10 +303,10 @@ const createStyles = (theme: Theme) => StyleSheet.create({
         paddingHorizontal: theme.spacing.md,
         paddingVertical: theme.spacing.sm,
         borderRadius: theme.borderRadius.full,
-        backgroundColor: theme.colors.surface,
+        backgroundColor: palette.glass,
         gap: theme.spacing.xs,
         borderWidth: 1,
-        borderColor: theme.colors.border,
+        borderColor: palette.glassBorder,
     },
     filterTabActive: {
         backgroundColor: theme.colors.primary,

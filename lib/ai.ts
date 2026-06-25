@@ -1,4 +1,4 @@
-import { config } from '@/constants/config';
+import { apiClient } from '@/lib/api';
 import { Task, DailyPlan, TimeBlock } from '@/types';
 import { aiCache } from '@/lib/aiCache';
 
@@ -7,55 +7,16 @@ interface ChatMessage {
     content: string;
 }
 
-interface OpenRouterResponse {
-    choices: {
-        message: {
-            content: string;
-        };
-    }[];
-}
-
-// OpenRouter AI Servisi
+// AI Servisi — istekler backend proxy (/ai/chat) üzerinden gider.
+// OpenRouter anahtarı YALNIZ sunucuda; uygulama paketine gömülmez.
 class AIService {
-    private apiKey: string;
-    private baseUrl: string;
-    private model: string;
-
-    constructor() {
-        this.apiKey = config.openrouter.apiKey;
-        this.baseUrl = config.openrouter.baseUrl;
-        this.model = config.openrouter.model;
-    }
-
     private async chat(messages: ChatMessage[]): Promise<string> {
-        if (!this.apiKey) {
-            console.warn('OpenRouter API key ayarlanmamış');
-            return this.getFallbackResponse();
-        }
-
         try {
-            const response = await fetch(`${this.baseUrl}/chat/completions`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${this.apiKey}`,
-                    'Content-Type': 'application/json',
-                    'HTTP-Referer': 'https://flowmind.app',
-                    'X-Title': 'FlowMind AI',
-                },
-                body: JSON.stringify({
-                    model: this.model,
-                    messages,
-                    max_tokens: 500,
-                    temperature: 0.7,
-                }),
-            });
-
-            if (!response.ok) {
-                throw new Error(`API Hatası: ${response.status}`);
+            const { data, error } = await apiClient.aiChat(messages);
+            if (error || !data?.content) {
+                return this.getFallbackResponse();
             }
-
-            const data = (await response.json()) as OpenRouterResponse;
-            return data.choices[0]?.message?.content || this.getFallbackResponse();
+            return data.content;
         } catch (error) {
             console.error('AI Servis Hatası:', error);
             return this.getFallbackResponse();
