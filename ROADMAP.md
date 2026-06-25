@@ -2,14 +2,22 @@
 
 ## 📊 Proje Durumu
 
+> 🧠 **Canlı/ayrıntılı durum:** [`docs/brain`](docs/brain/00-FlowMind-MOC.md) (Obsidian vault).
+> Bu tablo 2026-06-25'te git history'e göre güncellendi.
+
 | Aşama | Durum | Tamamlanma |
 |-------|-------|------------|
 | **Faz 1: Temel Yapı** | ✅ Tamamlandı | 100% |
-| **Faz 2: Backend API** | 🔄 Devam Ediyor | 0% |
-| **Faz 3: AI Entegrasyonu** | ⏳ Bekliyor | 0% |
-| **Faz 4: Veritabanı** | ⏳ Bekliyor | 0% |
-| **Faz 5: Test & Polish** | ⏳ Bekliyor | 0% |
-| **Faz 6: Lansman** | ⏳ Bekliyor | 0% |
+| **Faz 2: Backend API (Express + PostgreSQL)** | ✅ Tamamlandı | 100% |
+| **Faz 3: AI Entegrasyonu (OpenRouter + Gemma)** | ✅ Tamamlandı | 100% |
+| **Faz 4: Uygulama Geliştirme (görev/odak/takvim)** | ✅ Tamamlandı | 100% |
+| **Faz 5-6: Test, Polish & CI/CD** | ✅ Tamamlandı | 100% |
+| **Faz 7-10: Offline, sesli görev, bildirim, enerji trend** | ✅ Tamamlandı | 100% |
+| **Faz 11: Premium UI redesign (cybermorphism)** | 🔄 Devam Ediyor | ~70% |
+| **Faz 12: App Store submission** | 🔄 Devam Ediyor | ~80% |
+
+> ⚠️ Aşağıdaki eski faz detayları tarihsel plan olarak korunmuştur; gerçek
+> ilerleme için yukarıdaki tabloyu ve `docs/brain`'i baz al.
 
 ---
 

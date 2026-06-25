@@ -12,7 +12,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTaskStore } from '@/stores/taskStore';
 import { useTheme } from '@/components/ThemeProvider';
 import { useThemedStyles } from '@/hooks/useThemedStyles';
-import { Theme } from '@/constants/theme';
+import { Theme, palette } from '@/constants/theme';
+import { LinearGradient } from 'expo-linear-gradient';
+import { GlowOrb } from '@/components/ui/GlowOrb';
 import { Task } from '@/types';
 
 const DAYS = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
@@ -105,6 +107,15 @@ export default function CalendarScreen() {
 
     return (
         <SafeAreaView style={styles.container}>
+            <LinearGradient
+                colors={[palette.bgDeep, palette.bg, palette.bgElevated]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 0, y: 1 }}
+                style={StyleSheet.absoluteFill}
+                pointerEvents="none"
+            />
+            <GlowOrb color="violet" size={400} opacity={0.20} style={{ top: -140, right: -120 }} />
+            <GlowOrb color="indigo" size={280} opacity={0.14} style={{ bottom: -40, left: -90 }} />
             <ScrollView
                 contentContainerStyle={styles.content}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.colors.primary} />}
@@ -277,10 +288,12 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     taskItem: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: theme.colors.card,
+        backgroundColor: palette.glassStrong,
         borderRadius: 12,
         padding: 14,
         marginBottom: 8,
+        borderWidth: 1,
+        borderColor: palette.glassBorder,
     },
     taskDot: {
         width: 10,
