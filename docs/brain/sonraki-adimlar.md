@@ -1,39 +1,64 @@
 ---
-title: Sonraki Adımlar
+title: Yayın Yol Haritası
 type: plan
-tags: [flowmind, plan, todo]
+tags: [flowmind, plan, yayin, appstore]
 updated: 2026-06-25
 ---
 
-# ➡️ Sonraki Adımlar
+# 🚀 Yayın Yol Haritası
 
-İlgili: [[00-FlowMind-MOC]] · [[durum-guncel]] · [[karar-defteri]] · [[arac-mcp]]
+İlgili: [[00-FlowMind-MOC]] · [[durum-guncel]] · [[karar-defteri]] · [[mimari-deployment]]
 
-## 🔥 Acil (bu hafta)
+> Hedef: FlowMind'ı **en iyi haline getirip App Store'a** almak.
+> Sıra önemli — A bitmeden C'ye geçme.
 
-1. **WIP'i kaydet** — premium UI redesign commit'lenmemiş, kaybolabilir → [[durum-guncel]]
-   ```bash
-   git switch -c feature/premium-ui && git add -A && git commit -m "wip: premium glassmorphism redesign"
-   ```
-2. **Redesign'ı yay** — login/register/focus bitti; tasks, stats, profile, index, calendar tutarlı hale gelsin (`ui-ux-pro-max` skill) → [[mimari-frontend]]
-3. **Eskimiş dökümanları düzelt** — `ROADMAP.md` + `README.md` sürümleri → [[karar-defteri]]
+## ✅ Tamamlandı (2026-06-25)
 
-## 🧹 Temizlik
-
-4. **Supabase netleştir** — kullanılmıyorsa `npm rm @supabase/supabase-js` → [[karar-defteri]]
-5. **MCP temizliği** — alakasızları kaldır, ruflo'yu gözden geçir → [[arac-mcp]]
-6. **AI anahtarı** — istemcide ifşa riski; backend proxy değerlendir → [[mimari-ai]]
-
-## 🚀 Lansman (App Store)
-
-7. Screenshot'lar (iPhone 6.7"/6.5", Android) — `.agent/workflows/publish-app.md`
-8. `code-review` + `security-review` → production build → `eas submit` → [[mimari-deployment]]
-
-## 🧪 Sağlamlaştırma (opsiyonel)
-
-9. Store test kapsamını genişlet (taskStore, settingsStore) → [[mimari-state-zustand]]
-10. AI prompt kalitesi ölç/iyileştir → [[ozellik-ai-oneriler]]
+- Premium cybermorphism UI → tüm tab ekranları ([[durum-guncel]])
+- Yeni App Store ikonu: **Girdap Küre** (icon/adaptive/splash/favicon)
+- `tsc --noEmit` temiz, Expo Metro temiz başlıyor
+- Eskimiş ROADMAP/README düzeltildi
 
 ---
 
-> Bu not yaşayan bir liste. Tamamlananları işaretle, [[gelisim-fazlari]]'na taşı.
+## 🔴 FAZ A — Kod sağlamlaştırma (YAYINDAN ÖNCE ŞART)
+
+1. **AI anahtarı güvenliği** — `EXPO_PUBLIC_OPENROUTER_API_KEY` binary'e gömülüyor,
+   ifşa riski. `lib/ai.ts` çağrılarını backend proxy'ye taşı (`POST /ai/insight`),
+   anahtar yalnız sunucuda kalsın. → [[mimari-ai]] · [[karar-defteri]]
+   **Bu çözülmeden mağazaya çıkma.**
+2. **Patch sürümleri güncelle** — `npx expo install expo expo-font expo-router`
+3. **Supabase netleştir** — kullanılmıyorsa `npm rm @supabase/supabase-js` → [[karar-defteri]]
+4. **focus.tsx tutarlılık** — kullanıcının redesign'ı diğer ekranlarla aynı dilde mi? Gözden geçir → [[ozellik-enerji-ve-odak]]
+5. **Gerçek cihaz testi** — `eas build --profile development -p ios` → telefona kur →
+   login akışı dahil tüm akış çalışıyor mu (Expo Go secure-store'u tam desteklemez) → [[mimari-deployment]]
+
+## 🟡 FAZ B — Mağaza hazırlığı
+
+6. **Screenshot'lar** (App Store şartı) — yeni premium UI ile: Today, Tasks, Focus,
+   Stats, Profile. iPhone 6.7" (1290×2796) + 6.5" + Android. Bkz. `.agent/workflows/publish-app.md`
+7. **Store metni** — `docs/store-description.md` güncel mi (yeni özellikler/UI)?
+8. **Legal URL'leri** — `/privacy /terms /support` public host'ta erişilebilir mi doğrula → [[mimari-backend]]
+9. **App Store Connect metadata** — açıklama, anahtar kelimeler, kategori, yaş derecelendirme
+
+## 🟢 FAZ C — Build & Submit
+
+10. **Production build** — `eas build --platform ios --profile production` (buildNumber autoIncrement)
+11. **Submit** — `eas submit --platform ios --profile production` → App Store Connect
+12. **TestFlight** — önce internal test (kendin + birkaç kişi), kritik bug yoksa
+13. **Review'a gönder** — Apple inceleme 1-3 gün; ilk red olağan, geri bildirimi uygula
+
+## ⚪ FAZ D — Lansman sonrası
+
+14. **Sentry** bağla (crash/error takibi) → [[arac-mcp]]
+15. **MCP temizliği** — gürültüyü azalt → [[arac-mcp]]
+16. **İlk geri bildirim → iterasyon** — analytics, kullanıcı yorumları
+
+---
+
+## ⏱️ Kritik yol (en kısa yayın)
+
+```
+A1 (AI key) → A5 (cihaz testi) → B6 (screenshot) → C10 (build) → C11 (submit) → C13 (review)
+```
+A1 en riskli ve en önemli. Diğer A maddeleri paralel ilerleyebilir.

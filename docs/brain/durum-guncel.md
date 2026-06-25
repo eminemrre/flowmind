@@ -17,10 +17,17 @@ Git geçmişi **App Store submission hazırlığında** kaldığımızı göster
 EAS yapılandırması, gerçek ikon, `ascAppId` (6772716526), Apple ID, ve
 backend'de `/privacy /terms /support` legal sayfaları eklendi → [[mimari-deployment]]
 
-## 🟡 Çalışma alanı (commit'lenmemiş — RİSK!)
+## ✅ Güncelleme (2026-06-25)
 
-Working tree'de **yarım kalmış bir premium UI redesign** var. Henüz hiçbir
-commit'e girmemiş, yani `git stash` veya kaza ile **kaybolabilir**.
+Premium UI artık **tüm ekranlarda** (`feature/premium-ui` branch'i, 3 commit):
+auth + focus zaten vardı; index/tasks/stats/profile/calendar de cybermorphism
+diline getirildi. Yeni App Store ikonu **Girdap Küre** basıldı. `tsc` temiz.
+Sıradaki iş → [[sonraki-adimlar]] (yayın yol haritası).
+
+## 🟡 İlk redesign çalışması (tarihsel not)
+
+Bu işin başında premium UI redesign commit'lenmemişti (kayıp riski vardı);
+ilk iş `feature/premium-ui` branch'ine commit'lenerek güvenceye alındı.
 
 **Yeni dosyalar (untracked):**
 - `components/ui/GlassCard.tsx` (70 satır) — glassmorphism kart
