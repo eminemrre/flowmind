@@ -1,13 +1,15 @@
 import React from 'react';
 import {
-    TouchableOpacity,
+    Pressable,
     Text,
     StyleSheet,
     ActivityIndicator,
     ViewStyle,
     TextStyle,
+    View,
 } from 'react-native';
-import { theme } from '@/constants/theme';
+import { LinearGradient } from 'expo-linear-gradient';
+import { theme, palette } from '@/constants/theme';
 
 interface ButtonProps {
     title: string;
@@ -21,6 +23,12 @@ interface ButtonProps {
     fullWidth?: boolean;
 }
 
+const sizeMap = {
+    sm: { padV: theme.spacing.sm, padH: theme.spacing.base, font: theme.fontSize.sm, minH: 38 },
+    md: { padV: theme.spacing.md, padH: theme.spacing.xl, font: theme.fontSize.base, minH: 48 },
+    lg: { padV: theme.spacing.base, padH: theme.spacing['2xl'], font: theme.fontSize.lg, minH: 56 },
+};
+
 export function Button({
     title,
     onPress,
@@ -32,38 +40,76 @@ export function Button({
     textStyle,
     fullWidth = false,
 }: ButtonProps) {
-    const buttonStyles = [
-        styles.base,
-        styles[variant],
-        styles[`size_${size}`],
-        fullWidth && styles.fullWidth,
-        disabled && styles.disabled,
-        style,
-    ];
+    const isInactive = disabled || loading;
+    const sz = sizeMap[size];
 
-    const textStyles = [
-        styles.text,
-        styles[`text_${variant}`],
-        styles[`text_${size}`],
-        textStyle,
-    ];
+    // Primary = gradient brand button with glow
+    if (variant === 'primary') {
+        return (
+            <Pressable
+                onPress={onPress}
+                disabled={isInactive}
+                style={({ pressed }) => [
+                    styles.shadow,
+                    styles.glow,
+                    fullWidth && styles.fullWidth,
+                    pressed && !isInactive && styles.pressed,
+                    style,
+                ]}
+            >
+                <LinearGradient
+                    colors={theme.gradients.brand}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={[
+                        styles.gradient,
+                        { paddingVertical: sz.padV, paddingHorizontal: sz.padH, minHeight: sz.minH },
+                        isInactive && styles.disabled,
+                    ]}
+                >
+                    {loading ? (
+                        <ActivityIndicator color="#FFFFFF" size="small" />
+                    ) : (
+                        <Text style={[styles.text, styles.textPrimary, { fontSize: sz.font }, textStyle]}>
+                            {title}
+                        </Text>
+                    )}
+                </LinearGradient>
+            </Pressable>
+        );
+    }
+
+    // Secondary = glass with subtle border
+    // Outline = transparent with neon border
+    // Ghost = pure text
+    const variantStyle = styles[variant];
+    const variantTextStyle = styles[`text_${variant}` as keyof typeof styles];
 
     return (
-        <TouchableOpacity
-            style={buttonStyles}
+        <Pressable
             onPress={onPress}
-            disabled={disabled || loading}
-            activeOpacity={0.8}
+            disabled={isInactive}
+            style={({ pressed }) => [
+                styles.base,
+                variantStyle,
+                { paddingVertical: sz.padV, paddingHorizontal: sz.padH, minHeight: sz.minH },
+                fullWidth && styles.fullWidth,
+                isInactive && styles.disabled,
+                pressed && !isInactive && styles.pressed,
+                style,
+            ]}
         >
             {loading ? (
                 <ActivityIndicator
-                    color={variant === 'primary' ? '#fff' : theme.colors.primary}
+                    color={variant === 'ghost' ? palette.primary : '#FFFFFF'}
                     size="small"
                 />
             ) : (
-                <Text style={textStyles}>{title}</Text>
+                <Text style={[styles.text, variantTextStyle as TextStyle, { fontSize: sz.font }, textStyle]}>
+                    {title}
+                </Text>
             )}
-        </TouchableOpacity>
+        </Pressable>
     );
 }
 
@@ -73,72 +119,67 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         flexDirection: 'row',
+        overflow: 'hidden',
+    },
+    shadow: {
+        borderRadius: theme.borderRadius.lg,
+    },
+    glow: {
+        shadowColor: palette.primary,
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.55,
+        shadowRadius: 18,
+        elevation: 10,
+    },
+    gradient: {
+        borderRadius: theme.borderRadius.lg,
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'row',
+        overflow: 'hidden',
     },
 
-    // Variants
-    primary: {
-        backgroundColor: theme.colors.primary,
-    },
+    // Variants (non-primary)
     secondary: {
-        backgroundColor: theme.colors.gray100,
+        backgroundColor: palette.glassStrong,
+        borderWidth: 1,
+        borderColor: palette.glassBorder,
     },
     outline: {
         backgroundColor: 'transparent',
         borderWidth: 1.5,
-        borderColor: theme.colors.primary,
+        borderColor: palette.primary,
     },
     ghost: {
         backgroundColor: 'transparent',
     },
 
-    // Sizes
-    size_sm: {
-        paddingVertical: theme.spacing.sm,
-        paddingHorizontal: theme.spacing.base,
-        minHeight: 36,
-    },
-    size_md: {
-        paddingVertical: theme.spacing.md,
-        paddingHorizontal: theme.spacing.xl,
-        minHeight: 48,
-    },
-    size_lg: {
-        paddingVertical: theme.spacing.base,
-        paddingHorizontal: theme.spacing['2xl'],
-        minHeight: 56,
-    },
-
     fullWidth: {
         width: '100%',
     },
-
+    pressed: {
+        opacity: 0.85,
+        transform: [{ scale: 0.98 }],
+    },
     disabled: {
-        opacity: 0.5,
+        opacity: 0.4,
     },
 
-    // Text styles
+    // Text
     text: {
         fontWeight: theme.fontWeight.semibold,
+        letterSpacing: 0.2,
     },
-    text_primary: {
-        color: '#fff',
+    textPrimary: {
+        color: '#FFFFFF',
     },
     text_secondary: {
-        color: theme.colors.gray700,
+        color: '#FFFFFF',
     },
     text_outline: {
-        color: theme.colors.primary,
+        color: palette.primaryLight,
     },
     text_ghost: {
-        color: theme.colors.primary,
-    },
-    text_sm: {
-        fontSize: theme.fontSize.sm,
-    },
-    text_md: {
-        fontSize: theme.fontSize.base,
-    },
-    text_lg: {
-        fontSize: theme.fontSize.lg,
+        color: palette.primaryLight,
     },
 });
