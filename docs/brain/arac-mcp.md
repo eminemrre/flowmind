@@ -9,58 +9,67 @@ updated: 2026-06-25
 
 İlgili: [[00-FlowMind-MOC]] · [[karar-defteri]] · [[sonraki-adimlar]]
 
-> **Bağlam:** FlowMind = RN/Expo mobil + Express/Postgres backend. MCP'ler bu
-> bağlama göre değerlendirildi. Ana sorun eksik araç değil, **araç gürültüsü**.
+> **Bağlam:** FlowMind = RN/Expo mobil + Express/Postgres backend. Aşağıdaki tablo
+> `claude mcp list` health çıktısıyla (2026-06-25) doğrulandı. Ana sorun eksik
+> araç değil, **araç gürültüsü ve ölü bağlantılar**.
 
-## 🔴 Kaldır (bu projeyle alakasız — context yükü)
+## 📡 Gerçek durum (claude mcp list)
 
-| MCP | Neden |
-|---|---|
-| **Shopify** | E-ticaret; projeyle ilgisiz |
-| **Turkish Airlines** | Uçuş; tamamen ilgisiz |
-| **Twilio** | SMS/iletişim; bildirim zaten `expo-notifications` |
-| **Canva** | Tasarım; App Store görseli için bile zorlama |
-| **Notion** | Bilgi tabanı artık bu Obsidian vault → [[00-FlowMind-MOC]] |
-| **fakechat** | Demo/test MCP'si |
+| MCP | Sağlık | Karar | Neden |
+|---|---|---|---|
+| ruflo | ✔ Connected | 🟡 Gözden geçir | 200+ tool yükü; çoğu kullanılmıyor |
+| github (plugin) | ! tools fetch failed | 🟢 **Düzelt** | Çekirdek araç ama bozuk → re-auth |
+| Turkish Airlines | ✔ | 🔴 Kaldır | Alakasız |
+| Twilio | ✔ | 🔴 Kaldır | SMS; bildirim zaten expo-notifications |
+| Canva | ✔ | 🔴 Kaldır | Tasarım; gerekmiyor |
+| Notion | ✔ | 🔴 Kaldır | Bilgi tabanı artık [[00-FlowMind-MOC|docs/brain]] |
+| chrome-devtools | ✘ Failed | 🔴 Kaldır | Bağlanamıyor, her oturum deneniyor |
+| playwright (plugin) | ✘ Failed | 🔴 Kaldır/düzelt | Web test; mobilde marjinal |
+| qdrant | ✘ Failed | 🔴 Kaldır | Vektör DB; projede kullanılmıyor |
+| fakechat (plugin) | ✘ Failed | 🔴 Kaldır | Demo MCP |
+| aikido (plugin) | ✘ Failed | 🔴 Kaldır | Güvenlik tarama; ayrı çalıştır |
+| context7 (plugin) | ✘ Failed | ⚪ Düzelt (ops.) | Dök çekme — faydalı olabilir |
+| Shopify | ✘ Failed | 🔴 Kaldır | E-ticaret; alakasız |
 
-## 🟡 ruflo — gözden geçir (en büyük yük)
+## ⚪ Auth bekliyor (bağlı değil) — sadece gerekirse bağla
 
-- **200+ tool** yüklüyor: swarm, neural, wasm, hive-mind, daa, embeddings, autopilot…
-- Bu ölçekte bir uygulama için **aşırı** (overkill). Her oturumda token + araç-seçim
-  karmaşası getiriyor.
-- **[Olası]** Tek gerçek faydası `memory_*` ve belki `hooks_*`. Geri kalan kullanılmıyor.
-- **Öneri:** Ya tamamen kaldır, ya da yalnızca memory alt kümesine indir.
-  (Kalıcı hafıza zaten Claude Code'un kendi `memory/` mekanizmasıyla da sağlanıyor.)
+- **Supabase, Vercel, Sentry, Figma** → bu proje için *potansiyel* faydalı
+  (Supabase ölü-dep ise gereksiz → [[karar-defteri]]; Sentry App Store sonrası crash takibi → [[mimari-deployment]]).
+- Geri kalan onlarca (IBKR, Semrush, Slack, Atlassian, Adobe x4, Meta Ads, Linear,
+  SketchUp, Higgsfield, Windsor, Google Drive) → **alakasız**, yok say.
 
-## 🟢 Tut (gerçekten faydalı)
+## 🛠️ Kaldırma — 3 mekanizma
 
-| MCP | Neden |
-|---|---|
-| **github** | Kod, PR, issue, release — çekirdek iş akışı |
-| **chrome-devtools** *veya* **playwright** | **Birini seç.** Expo web + backend legal sayfaları (`/privacy /terms /support`) debug/test. İkisi birden gereksiz |
+```bash
+# 1) Doğrudan MCP server'lar (çalışmayanlar):
+claude mcp remove qdrant
+claude mcp remove chrome-devtools
 
-## ⚪ Eklemeyi değerlendir (şart değil)
+# 2) ruflo (kullanmıyorsan):
+claude mcp remove ruflo
+```
 
-- **Context7 (doküman MCP)** — Expo/RN/React 19 hızlı değişiyor; güncel API çekmek faydalı
-- **Sentry MCP** — App Store'a çıkınca crash/error takibi → [[mimari-deployment]]
-- **Supabase MCP** — *yalnızca* Supabase gerçekten kullanılacaksa → [[karar-defteri]] (muhtemelen değil)
+**3) Plugin'ler** → `/plugin` menüsü:
+- Disable: `fakechat`, `aikido`, (kullanmıyorsan `playwright`)
+- Düzelt/koru: `github` (re-auth), `context7`
 
-> Net tavsiye: önce **kaldır**, sonra ihtiyaç doğdukça ekle. Boş araç ekleme.
+**4) claude.ai Connector'ları** → claude.ai web → **Settings → Connectors → Disconnect**:
+- Turkish Airlines, Twilio, Canva, Notion, Shopify
+
+> ⚠️ Connector'lar CLI'dan (`claude mcp remove`) kalkmaz — claude.ai hesabına bağlı.
+
+## 🎯 Tutulacak minimal set
+
+**github** (düzeltilince) + **ruflo** (kullanılıyorsa) + gerekirse **context7**.
+Gerisi gürültü. Önce kaldır, ihtiyaç doğdukça ekle.
 
 ## 🎯 İş için doğrudan faydalı Skill'ler
 
 | Skill | Ne zaman |
 |---|---|
-| `ui-ux-pro-max` | Premium UI redesign — **şu an WIP** → [[durum-guncel]] |
+| `ui-ux-pro-max` | Premium UI redesign — uygulandı → [[durum-guncel]] |
 | `frontend-design` | Görsel kimlik / tipografi yönü |
 | `karpathy-guidelines` | Kodlama disiplini (yüklü) |
 | `code-review` / `security-review` | Submission öncesi denetim |
 | `verify` | Değişiklik gerçekten çalışıyor mu |
-| `commit` | Temiz commit'ler (WIP'i kaydet!) |
-
-## Komutlar (kaldırma)
-
-```bash
-claude mcp list                 # mevcut durumu gör
-claude mcp remove <isim>        # global tanımlıysa böyle
-```
+| `commit` | Temiz commit'ler |

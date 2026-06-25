@@ -17,7 +17,9 @@ import { router } from 'expo-router';
 import { useAuthStore } from '@/stores/authStore';
 import { useTheme } from '@/components/ThemeProvider';
 import { useThemedStyles } from '@/hooks/useThemedStyles';
-import { Theme } from '@/constants/theme';
+import { Theme, palette } from '@/constants/theme';
+import { LinearGradient } from 'expo-linear-gradient';
+import { GlowOrb } from '@/components/ui/GlowOrb';
 import { apiClient } from '@/lib/api';
 import { Button } from '@/components/ui/Button';
 
@@ -79,6 +81,15 @@ export default function ProfileScreen() {
 
     return (
         <SafeAreaView style={styles.container}>
+            <LinearGradient
+                colors={[palette.bgDeep, palette.bg, palette.bgElevated]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 0, y: 1 }}
+                style={StyleSheet.absoluteFill}
+                pointerEvents="none"
+            />
+            <GlowOrb color="indigo" size={420} opacity={0.22} style={{ top: -150, left: -120 }} />
+            <GlowOrb color="pink" size={300} opacity={0.15} style={{ bottom: 40, right: -110 }} />
             <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
                 {/* Header / Avatar Section */}
                 <View style={styles.header}>
@@ -307,10 +318,12 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     },
     statsRow: {
         flexDirection: 'row',
-        backgroundColor: theme.colors.card,
+        backgroundColor: palette.glassStrong,
         borderRadius: theme.borderRadius.xl,
         padding: theme.spacing.lg,
         marginBottom: theme.spacing.xl,
+        borderWidth: 1,
+        borderColor: palette.glassBorder,
         ...theme.shadow.sm,
     },
     statItem: {
@@ -333,9 +346,11 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     },
     section: {
         marginBottom: theme.spacing.xl,
-        backgroundColor: theme.colors.card,
+        backgroundColor: palette.glassStrong,
         borderRadius: theme.borderRadius.xl,
         overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: palette.glassBorder,
         ...theme.shadow.sm,
     },
     sectionTitle: {

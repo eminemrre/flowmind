@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, SafeAreaView, ActivityIndicator, RefreshControl, TouchableOpacity, Alert, Dimensions } from 'react-native';
-import { Theme } from '@/constants/theme';
+import { Theme, palette } from '@/constants/theme';
+import { LinearGradient } from 'expo-linear-gradient';
+import { GlowOrb } from '@/components/ui/GlowOrb';
 import { useAuthStore } from '@/stores/authStore';
 import { useGamificationStore, ACHIEVEMENT_INFO } from '@/stores/gamificationStore';
 import { apiClient } from '@/lib/api';
@@ -102,6 +104,15 @@ export default function StatsScreen() {
 
     return (
         <SafeAreaView style={styles.container}>
+            <LinearGradient
+                colors={[palette.bgDeep, palette.bg, palette.bgElevated]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 0, y: 1 }}
+                style={StyleSheet.absoluteFill}
+                pointerEvents="none"
+            />
+            <GlowOrb color="violet" size={420} opacity={0.20} style={{ top: -140, right: -120 }} />
+            <GlowOrb color="cyan" size={300} opacity={0.14} style={{ bottom: -40, left: -100 }} />
             <ScrollView
                 style={styles.scrollView}
                 contentContainerStyle={styles.content}
@@ -305,10 +316,12 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     periodTextActive: { color: '#fff', fontWeight: theme.fontWeight.bold },
     loadingState: { paddingVertical: 60, alignItems: 'center' },
     card: {
-        backgroundColor: theme.colors.card,
+        backgroundColor: palette.glassStrong,
         borderRadius: theme.borderRadius.xl,
         padding: theme.spacing.base,
         marginBottom: theme.spacing.base,
+        borderWidth: 1,
+        borderColor: palette.glassBorder,
         ...theme.shadow.sm,
     },
     cardTitle: { fontSize: theme.fontSize.lg, fontWeight: theme.fontWeight.semibold, color: theme.colors.text, marginBottom: theme.spacing.md },

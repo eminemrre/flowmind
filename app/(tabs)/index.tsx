@@ -9,8 +9,11 @@ import {
     RefreshControl,
 } from 'react-native';
 import { router } from 'expo-router';
-import { theme } from '@/constants/theme';
-import { Button } from '@/components/ui/Button';
+import { LinearGradient } from 'expo-linear-gradient';
+import { theme, palette } from '@/constants/theme';
+import { GlassCard } from '@/components/ui/GlassCard';
+import { GlowOrb } from '@/components/ui/GlowOrb';
+import { GradientButton } from '@/components/ui/GradientButton';
 import { TaskCard } from '@/components/ui/TaskCard';
 import { EnergyBar } from '@/components/ui/EnergyBar';
 import { Confetti } from '@/components/ui/Confetti';
@@ -62,7 +65,7 @@ export default function TodayScreen() {
             );
             setAiInsight(insight);
         } catch {
-            setAiInsight('Bugünkü görevlerini kontrol et ve en önemli olandan başla! 💪');
+            setAiInsight('Bugünkü görevlerini kontrol et ve en önemli olandan başla.');
         }
         setAiLoading(false);
     };
@@ -75,116 +78,127 @@ export default function TodayScreen() {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
-            <ScrollView
-                style={styles.scrollView}
-                contentContainerStyle={styles.content}
-                showsVerticalScrollIndicator={false}
-                refreshControl={
-                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-                }
-            >
-                {/* Greeting */}
-                <View style={styles.greetingSection}>
-                    <Text style={styles.greeting}>{greeting}</Text>
-                    <Text style={styles.userName}>{userName}! 👋</Text>
-                    <Text style={styles.subtitle}>
-                        Bugün için {pendingTasks.length} görev planlandı
-                    </Text>
-                </View>
+        <View style={styles.root}>
+            <LinearGradient
+                colors={[palette.bgDeep, palette.bg, palette.bgElevated]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 0, y: 1 }}
+                style={StyleSheet.absoluteFill}
+            />
+            <GlowOrb color="indigo" size={420} opacity={0.28} style={{ top: -140, left: -110 }} />
+            <GlowOrb color="pink" size={320} opacity={0.18} style={{ top: '35%', right: -120 }} />
 
-                {/* Energy Bar */}
-                <View style={styles.section}>
-                    <EnergyBar level={4} />
-                </View>
-
-                {/* AI Insight Card */}
-                <View style={styles.aiCard}>
-                    <View style={styles.aiHeader}>
-                        <Text style={styles.aiEmoji}>🧠</Text>
-                        <Text style={styles.aiTitle}>AI Önerisi</Text>
-                    </View>
-                    {aiLoading ? (
-                        <ActivityIndicator size="small" color={theme.colors.primary} style={{ marginVertical: 12 }} />
-                    ) : (
-                        <Text style={styles.aiText}>
-                            {aiInsight || 'Bugünkü görevlerini kontrol et ve en önemli olandan başla! 💪'}
+            <SafeAreaView style={styles.container}>
+                <ScrollView
+                    style={styles.scrollView}
+                    contentContainerStyle={styles.content}
+                    showsVerticalScrollIndicator={false}
+                    refreshControl={
+                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={palette.primaryLight} />
+                    }
+                >
+                    {/* Greeting */}
+                    <View style={styles.greetingSection}>
+                        <Text style={styles.greeting}>{greeting}</Text>
+                        <Text style={styles.userName}>{userName}</Text>
+                        <Text style={styles.subtitle}>
+                            Bugün için {pendingTasks.length} görev planlandı
                         </Text>
-                    )}
-                    <Button
-                        title="Yenile"
-                        onPress={loadAiInsight}
-                        size="sm"
-                        style={styles.aiButton}
-                    />
-                </View>
-
-                {/* Loading State */}
-                {isLoading && tasks.length === 0 ? (
-                    <View style={styles.loadingState}>
-                        <ActivityIndicator size="large" color={theme.colors.primary} />
                     </View>
-                ) : (
-                    <>
-                        {/* Pending Tasks */}
-                        {pendingTasks.length > 0 && (
-                            <View style={styles.section}>
-                                <Text style={styles.sectionTitle}>📋 Yapılacaklar</Text>
-                                {pendingTasks.map((task, index) => (
-                                    <TaskCard
-                                        key={task.id}
-                                        index={index}
-                                        task={task}
-                                        onComplete={() => handleTaskComplete(task.id)}
-                                        onPress={() => router.push('/(tabs)/tasks')}
-                                    />
-                                ))}
-                            </View>
-                        )}
 
-                        {/* Completed Tasks */}
-                        {completedTasks.length > 0 && (
-                            <View style={styles.section}>
-                                <Text style={styles.sectionTitle}>✅ Tamamlananlar</Text>
-                                {completedTasks.map((task, index) => (
-                                    <TaskCard
-                                        key={task.id}
-                                        index={index}
-                                        task={task}
-                                        onPress={() => router.push('/(tabs)/tasks')}
-                                    />
-                                ))}
-                            </View>
-                        )}
+                    {/* Energy Bar */}
+                    <View style={styles.section}>
+                        <EnergyBar level={4} />
+                    </View>
 
-                        {/* Empty State */}
-                        {displayTasks.length === 0 && !isLoading && (
-                            <View style={styles.emptyState}>
-                                <Text style={styles.emptyEmoji}>🎉</Text>
-                                <Text style={styles.emptyTitle}>Görev yok!</Text>
-                                <Text style={styles.emptySubtitle}>Yeni görev ekleyerek başla</Text>
-                            </View>
+                    {/* AI Insight Card */}
+                    <GlassCard glow="indigo" padding="lg" style={styles.aiCard}>
+                        <Text style={styles.aiLabel}>AI ÖNERİSİ</Text>
+                        {aiLoading ? (
+                            <ActivityIndicator size="small" color={palette.primaryLight} style={{ marginVertical: 12, alignSelf: 'flex-start' }} />
+                        ) : (
+                            <Text style={styles.aiText}>
+                                {aiInsight || 'Bugünkü görevlerini kontrol et ve en önemli olandan başla.'}
+                            </Text>
                         )}
-                    </>
-                )}
+                        <GradientButton
+                            title="Yenile"
+                            onPress={loadAiInsight}
+                            variant="glass"
+                            size="sm"
+                            glow={false}
+                            style={styles.aiButton}
+                        />
+                    </GlassCard>
 
-                {/* Quick Actions */}
-                <View style={styles.quickActions}>
-                    <Button
-                        title="+ Yeni Görev"
-                        onPress={() => router.push('/(tabs)/tasks')}
-                        variant="outline"
-                        fullWidth
-                    />
-                    <View style={styles.actionGap} />
-                    <Button
-                        title="🎯 Odaklanmaya Başla"
-                        onPress={() => router.push('/(tabs)/focus')}
-                        variant="primary"
-                        fullWidth
-                    />
-                </View>
-            </ScrollView>
+                    {/* Loading State */}
+                    {isLoading && tasks.length === 0 ? (
+                        <View style={styles.loadingState}>
+                            <ActivityIndicator size="large" color={palette.primaryLight} />
+                        </View>
+                    ) : (
+                        <>
+                            {/* Pending Tasks */}
+                            {pendingTasks.length > 0 && (
+                                <View style={styles.section}>
+                                    <Text style={styles.sectionLabel}>YAPILACAKLAR</Text>
+                                    {pendingTasks.map((task, index) => (
+                                        <TaskCard
+                                            key={task.id}
+                                            index={index}
+                                            task={task}
+                                            onComplete={() => handleTaskComplete(task.id)}
+                                            onPress={() => router.push('/(tabs)/tasks')}
+                                        />
+                                    ))}
+                                </View>
+                            )}
+
+                            {/* Completed Tasks */}
+                            {completedTasks.length > 0 && (
+                                <View style={styles.section}>
+                                    <Text style={styles.sectionLabel}>TAMAMLANANLAR</Text>
+                                    {completedTasks.map((task, index) => (
+                                        <TaskCard
+                                            key={task.id}
+                                            index={index}
+                                            task={task}
+                                            onPress={() => router.push('/(tabs)/tasks')}
+                                        />
+                                    ))}
+                                </View>
+                            )}
+
+                            {/* Empty State */}
+                            {displayTasks.length === 0 && !isLoading && (
+                                <GlassCard padding="2xl" style={styles.emptyState}>
+                                    <Text style={styles.emptyTitle}>Bugün temiz</Text>
+                                    <Text style={styles.emptySubtitle}>Yeni bir görev ekleyerek başla</Text>
+                                </GlassCard>
+                            )}
+                        </>
+                    )}
+
+                    {/* Quick Actions */}
+                    <View style={styles.quickActions}>
+                        <GradientButton
+                            title="Yeni Görev"
+                            onPress={() => router.push('/(tabs)/tasks')}
+                            variant="glass"
+                            glow={false}
+                            fullWidth
+                        />
+                        <View style={styles.actionGap} />
+                        <GradientButton
+                            title="Odaklanmaya Başla"
+                            onPress={() => router.push('/(tabs)/focus')}
+                            variant="brand"
+                            size="lg"
+                            fullWidth
+                        />
+                    </View>
+                </ScrollView>
+            </SafeAreaView>
 
             {/* Confetti Overlay */}
             {showConfetti && (
@@ -197,7 +211,7 @@ export default function TodayScreen() {
                     />
                 </View>
             )}
-        </SafeAreaView>
+        </View>
     );
 }
 
@@ -209,70 +223,65 @@ function getGreeting(): string {
 }
 
 const styles = StyleSheet.create({
+    root: {
+        flex: 1,
+        backgroundColor: palette.bg,
+    },
     container: {
         flex: 1,
-        backgroundColor: theme.colors.gray50,
     },
     scrollView: {
         flex: 1,
     },
     content: {
-        padding: theme.spacing.base,
+        padding: theme.spacing.lg,
         paddingBottom: theme.spacing['4xl'],
     },
     greetingSection: {
         marginBottom: theme.spacing.xl,
+        marginTop: theme.spacing.sm,
     },
     greeting: {
         fontSize: theme.fontSize.lg,
-        color: theme.colors.gray500,
+        color: palette.textSecondary,
+        letterSpacing: 0.3,
     },
     userName: {
-        fontSize: theme.fontSize['3xl'],
+        fontSize: theme.fontSize['4xl'],
         fontWeight: theme.fontWeight.bold,
-        color: theme.colors.gray900,
-        marginBottom: theme.spacing.xs,
+        color: palette.textPrimary,
+        letterSpacing: -0.5,
+        marginVertical: 2,
     },
     subtitle: {
         fontSize: theme.fontSize.base,
-        color: theme.colors.gray500,
+        color: palette.textMuted,
     },
     section: {
         marginBottom: theme.spacing.xl,
     },
-    sectionTitle: {
-        fontSize: theme.fontSize.lg,
+    sectionLabel: {
+        fontSize: theme.fontSize.xs,
         fontWeight: theme.fontWeight.semibold,
-        color: theme.colors.gray800,
+        color: palette.textMuted,
+        letterSpacing: 1.6,
         marginBottom: theme.spacing.md,
     },
     aiCard: {
-        backgroundColor: theme.colors.primary + '10',
-        borderRadius: theme.borderRadius.xl,
-        padding: theme.spacing.base,
         marginBottom: theme.spacing.xl,
-        borderWidth: 1,
-        borderColor: theme.colors.primary + '30',
     },
-    aiHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
+    aiLabel: {
+        fontSize: theme.fontSize.xs,
+        fontWeight: theme.fontWeight.bold,
+        color: palette.primaryLight,
+        letterSpacing: 1.8,
         marginBottom: theme.spacing.sm,
     },
-    aiEmoji: {
-        fontSize: 20,
-        marginRight: theme.spacing.sm,
-    },
-    aiTitle: {
-        fontSize: theme.fontSize.base,
-        fontWeight: theme.fontWeight.semibold,
-        color: theme.colors.primary,
-    },
     aiText: {
-        fontSize: theme.fontSize.sm,
-        color: theme.colors.gray700,
-        lineHeight: 20,
-        marginBottom: theme.spacing.md,
+        fontSize: theme.fontSize.base,
+        color: palette.textSecondary,
+        lineHeight: 22,
+        marginBottom: theme.spacing.base,
     },
     aiButton: {
         alignSelf: 'flex-start',
@@ -283,23 +292,20 @@ const styles = StyleSheet.create({
     },
     emptyState: {
         alignItems: 'center',
-        paddingVertical: 40,
-    },
-    emptyEmoji: {
-        fontSize: 48,
+        marginBottom: theme.spacing.xl,
     },
     emptyTitle: {
-        fontSize: theme.fontSize.lg,
+        fontSize: theme.fontSize.xl,
         fontWeight: theme.fontWeight.bold,
-        color: theme.colors.gray800,
-        marginTop: theme.spacing.md,
+        color: palette.textPrimary,
+        marginBottom: theme.spacing.xs,
     },
     emptySubtitle: {
         fontSize: theme.fontSize.sm,
-        color: theme.colors.gray500,
+        color: palette.textMuted,
     },
     quickActions: {
-        marginTop: theme.spacing.xl,
+        marginTop: theme.spacing.md,
     },
     actionGap: {
         height: theme.spacing.md,
