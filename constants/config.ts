@@ -1,12 +1,5 @@
 // API Configuration
 export const config = {
-    // OpenRouter AI (Free models)
-    openrouter: {
-        apiKey: process.env.EXPO_PUBLIC_OPENROUTER_API_KEY || '',
-        baseUrl: 'https://openrouter.ai/api/v1',
-        model: 'google/gemma-3-4b-it:free', // Free model - tested
-    },
-
     // VDS Backend
     api: {
         baseUrl: process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:3000/api',
