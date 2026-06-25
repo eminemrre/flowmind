@@ -1,8 +1,23 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, SafeAreaView, KeyboardAvoidingView, Platform, TouchableOpacity, Pressable, Alert, ScrollView } from 'react-native';
+import {
+    View,
+    Text,
+    TextInput,
+    StyleSheet,
+    SafeAreaView,
+    KeyboardAvoidingView,
+    Platform,
+    Alert,
+    ScrollView,
+    Image,
+    Pressable,
+} from 'react-native';
 import { router } from 'expo-router';
-import { theme } from '@/constants/theme';
+import { LinearGradient } from 'expo-linear-gradient';
+import { theme, palette } from '@/constants/theme';
 import { Button } from '@/components/ui/Button';
+import { GlassCard } from '@/components/ui/GlassCard';
+import { GlowOrb } from '@/components/ui/GlowOrb';
 import { useAuthStore } from '@/stores/authStore';
 
 export default function LoginScreen() {
@@ -12,7 +27,6 @@ export default function LoginScreen() {
     const { login } = useAuthStore();
 
     const handleLogin = async () => {
-        // Validation
         if (!email.trim()) {
             Alert.alert('Hata', 'E-posta adresi gerekli');
             return;
@@ -34,109 +48,196 @@ export default function LoginScreen() {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
-            <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                style={styles.keyboardView}
-            >
-                <ScrollView
-                    contentContainerStyle={styles.scrollContent}
-                    keyboardShouldPersistTaps="handled"
-                    showsVerticalScrollIndicator={false}
+        <View style={styles.root}>
+            <LinearGradient
+                colors={[palette.bgDeep, palette.bg, palette.bgElevated]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 0, y: 1 }}
+                style={StyleSheet.absoluteFill}
+            />
+            <GlowOrb color="indigo" size={420} opacity={0.35} style={{ top: -120, left: -100 }} />
+            <GlowOrb color="pink" size={380} opacity={0.25} style={{ bottom: -100, right: -80 }} />
+            <GlowOrb color="cyan" size={260} opacity={0.2} style={{ top: '40%', right: -100 }} />
+
+            <SafeAreaView style={styles.safe}>
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                    style={styles.kbView}
                 >
-                    {/* Logo */}
-                    <View style={styles.logoContainer}>
-                        <Text style={styles.logo}>🧠</Text>
-                        <Text style={styles.appName}>FlowMind</Text>
-                        <Text style={styles.tagline}>Akışa gir, akışta kal</Text>
-                    </View>
+                    <ScrollView
+                        contentContainerStyle={styles.scroll}
+                        keyboardShouldPersistTaps="handled"
+                        showsVerticalScrollIndicator={false}
+                    >
+                        {/* Hero / Logo */}
+                        <View style={styles.hero}>
+                            <View style={styles.logoGlow}>
+                                <Image
+                                    source={require('@/assets/icon.png')}
+                                    style={styles.logo}
+                                />
+                            </View>
+                            <Text style={styles.appName}>FlowMind</Text>
+                            <Text style={styles.tagline}>Enerji ritmine göre çalış</Text>
+                        </View>
 
-                    {/* Form */}
-                    <View style={styles.form}>
-                        <Text style={styles.label}>E-posta</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="ornek@email.com"
-                            placeholderTextColor={theme.colors.gray400}
-                            keyboardType="email-address"
-                            autoCapitalize="none"
-                            autoCorrect={false}
-                            value={email}
-                            onChangeText={setEmail}
-                        />
+                        {/* Form */}
+                        <GlassCard padding="xl" glow="indigo" style={styles.formCard}>
+                            <Text style={styles.label}>E-posta</Text>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="ornek@email.com"
+                                placeholderTextColor={palette.textDim}
+                                keyboardType="email-address"
+                                autoCapitalize="none"
+                                autoCorrect={false}
+                                value={email}
+                                onChangeText={setEmail}
+                            />
 
-                        <Text style={styles.label}>Şifre</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="••••••••"
-                            placeholderTextColor={theme.colors.gray400}
-                            secureTextEntry
-                            value={password}
-                            onChangeText={setPassword}
-                        />
+                            <Text style={styles.label}>Şifre</Text>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="••••••••"
+                                placeholderTextColor={palette.textDim}
+                                secureTextEntry
+                                value={password}
+                                onChangeText={setPassword}
+                            />
 
-                        <TouchableOpacity style={styles.forgotPassword}>
-                            <Text style={styles.forgotPasswordText}>Şifremi Unuttum</Text>
-                        </TouchableOpacity>
+                            <Pressable style={styles.forgot} hitSlop={8}>
+                                <Text style={styles.forgotText}>Şifremi Unuttum</Text>
+                            </Pressable>
 
-                        <Button
-                            title="Giriş Yap"
-                            onPress={handleLogin}
-                            loading={loading}
-                            fullWidth
-                            size="lg"
-                        />
+                            <Button
+                                title="Giriş Yap"
+                                onPress={handleLogin}
+                                loading={loading}
+                                fullWidth
+                                size="lg"
+                            />
 
-                        {/* Register CTA — form içinde, Login butonunun hemen altında */}
-                        <Pressable
-                            onPress={() => router.push('/(auth)/register')}
-                            style={({ pressed }) => [styles.registerCta, pressed && styles.registerCtaPressed]}
-                        >
-                            <Text style={styles.registerCtaText}>
-                                Hesabın yok mu? <Text style={styles.registerCtaTextBold}>Kayıt Ol</Text>
-                            </Text>
-                        </Pressable>
-                    </View>
+                            <Pressable
+                                onPress={() => router.push('/(auth)/register')}
+                                style={({ pressed }) => [styles.registerCta, pressed && styles.registerCtaPressed]}
+                            >
+                                <Text style={styles.registerText}>
+                                    Hesabın yok mu?{' '}
+                                    <Text style={styles.registerLink}>Kayıt Ol</Text>
+                                </Text>
+                            </Pressable>
+                        </GlassCard>
 
-                    {/* Divider */}
-                    <View style={styles.divider}>
-                        <View style={styles.dividerLine} />
-                        <Text style={styles.dividerText}>veya</Text>
-                        <View style={styles.dividerLine} />
-                    </View>
-
-                    {/* Social Logins */}
-                    <Button
-                        title="Apple ile Devam Et"
-                        onPress={() => Alert.alert('Yakında', 'Apple Sign-In yakında eklenecek!')}
-                        variant="secondary"
-                        fullWidth
-                    />
-                </ScrollView>
-            </KeyboardAvoidingView>
-        </SafeAreaView>
+                        <Text style={styles.footer}>
+                            Verilerin Türkiye'de güvende
+                        </Text>
+                    </ScrollView>
+                </KeyboardAvoidingView>
+            </SafeAreaView>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: theme.colors.background },
-    keyboardView: { flex: 1 },
-    content: { flex: 1, padding: theme.spacing.xl, justifyContent: 'center' },
-    scrollContent: { flexGrow: 1, padding: theme.spacing.xl, justifyContent: 'center' },
-    logoContainer: { alignItems: 'center', marginBottom: theme.spacing['3xl'] },
-    logo: { fontSize: 64, marginBottom: theme.spacing.md },
-    appName: { fontSize: theme.fontSize['3xl'], fontWeight: theme.fontWeight.bold, color: theme.colors.gray900 },
-    tagline: { fontSize: theme.fontSize.base, color: theme.colors.gray500 },
-    form: { marginBottom: theme.spacing.xl },
-    label: { fontSize: theme.fontSize.sm, fontWeight: theme.fontWeight.medium, color: theme.colors.gray700, marginBottom: theme.spacing.xs },
-    input: { backgroundColor: theme.colors.gray50, borderWidth: 1, borderColor: theme.colors.gray200, borderRadius: theme.borderRadius.lg, padding: theme.spacing.base, fontSize: theme.fontSize.base, marginBottom: theme.spacing.base, color: theme.colors.gray900 },
-    forgotPassword: { alignSelf: 'flex-end', marginBottom: theme.spacing.xl },
-    forgotPasswordText: { fontSize: theme.fontSize.sm, color: theme.colors.primary },
-    divider: { flexDirection: 'row', alignItems: 'center', marginVertical: theme.spacing.xl },
-    dividerLine: { flex: 1, height: 1, backgroundColor: theme.colors.gray200 },
-    dividerText: { paddingHorizontal: theme.spacing.md, color: theme.colors.gray400, fontSize: theme.fontSize.sm },
-    registerCta: { marginTop: theme.spacing.md, minHeight: 48, alignItems: 'center', justifyContent: 'center', paddingVertical: theme.spacing.md, paddingHorizontal: theme.spacing.base, borderRadius: theme.borderRadius.lg, backgroundColor: theme.colors.gray50, borderWidth: 1, borderColor: theme.colors.gray200 },
-    registerCtaPressed: { opacity: 0.6, backgroundColor: theme.colors.gray100 },
-    registerCtaText: { fontSize: theme.fontSize.base, color: theme.colors.gray700, textAlign: 'center' },
-    registerCtaTextBold: { color: theme.colors.primary, fontWeight: theme.fontWeight.semibold },
+    root: {
+        flex: 1,
+        backgroundColor: palette.bg,
+    },
+    safe: {
+        flex: 1,
+    },
+    kbView: {
+        flex: 1,
+    },
+    scroll: {
+        flexGrow: 1,
+        padding: theme.spacing.xl,
+        justifyContent: 'center',
+    },
+    hero: {
+        alignItems: 'center',
+        marginBottom: theme.spacing['2xl'],
+    },
+    logoGlow: {
+        shadowColor: palette.primary,
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.8,
+        shadowRadius: 30,
+        elevation: 12,
+        marginBottom: theme.spacing.lg,
+    },
+    logo: {
+        width: 96,
+        height: 96,
+        borderRadius: 22,
+    },
+    appName: {
+        fontSize: theme.fontSize['4xl'],
+        fontWeight: theme.fontWeight.bold,
+        color: palette.textPrimary,
+        letterSpacing: -0.5,
+    },
+    tagline: {
+        fontSize: theme.fontSize.base,
+        color: palette.textSecondary,
+        marginTop: 4,
+        letterSpacing: 0.3,
+    },
+    formCard: {
+        marginBottom: theme.spacing.xl,
+    },
+    label: {
+        fontSize: theme.fontSize.sm,
+        fontWeight: theme.fontWeight.medium,
+        color: palette.textSecondary,
+        marginBottom: theme.spacing.xs,
+        letterSpacing: 0.3,
+    },
+    input: {
+        backgroundColor: palette.glass,
+        borderWidth: 1,
+        borderColor: palette.glassBorder,
+        borderRadius: theme.borderRadius.lg,
+        paddingVertical: theme.spacing.md,
+        paddingHorizontal: theme.spacing.base,
+        fontSize: theme.fontSize.base,
+        marginBottom: theme.spacing.base,
+        color: palette.textPrimary,
+    },
+    forgot: {
+        alignSelf: 'flex-end',
+        marginBottom: theme.spacing.lg,
+        padding: 4,
+    },
+    forgotText: {
+        fontSize: theme.fontSize.sm,
+        color: palette.primaryLight,
+        fontWeight: theme.fontWeight.medium,
+    },
+    registerCta: {
+        marginTop: theme.spacing.lg,
+        minHeight: 44,
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: theme.spacing.md,
+    },
+    registerCtaPressed: {
+        opacity: 0.6,
+    },
+    registerText: {
+        fontSize: theme.fontSize.base,
+        color: palette.textSecondary,
+        textAlign: 'center',
+    },
+    registerLink: {
+        color: palette.primaryLight,
+        fontWeight: theme.fontWeight.semibold,
+    },
+    footer: {
+        textAlign: 'center',
+        fontSize: theme.fontSize.xs,
+        color: palette.textMuted,
+        marginTop: theme.spacing.lg,
+        letterSpacing: 0.5,
+    },
 });
