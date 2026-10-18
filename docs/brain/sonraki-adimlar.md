@@ -22,10 +22,13 @@ updated: 2026-10-18
 
 ## 🔴 FAZ B — Mağaza hazırlığı
 
-Sırayla (ilk ikisi red sebebi):
+Sırayla:
 
-6. **Uygulama içinden hesap silme** (`DELETE /api/auth/account` + profil butonu) → [[yayin-engelleri]] E1
+6. ✅ **Uygulama içinden hesap silme** — `DELETE /api/auth/account`,
+   `DeleteAccountModal`, store aksiyonu, testler ve legal metin güncellemesi
+   (2026-10-18). Ayrıntı: [[yayin-engelleri]] E1
 7. **Legal URL'leri yayına al** ve karar ver: backend mi, statik host mu → [[yayin-engelleri]] E2
+   (karar verilince profil ekranındaki "Gizlilik Politikası" satırı da bu URL'e bağlanmalı)
 8. **Store metnini düzelt** — "sesli görev" iddiası gerçek değil → [[yayin-engelleri]] E4
 9. **AI modelini üretim için seç** (ücretsiz model kotalı) → [[yayin-engelleri]] E5
 10. **Screenshot'lar** — yeni premium UI ile: Today, Tasks, Focus, Stats, Profile.
@@ -33,6 +36,7 @@ Sırayla (ilk ikisi red sebebi):
     Bkz. `.agent/workflows/publish-app.md`
 11. **Kök test boru hattını onar** (`jest`, `jest-expo`, `@testing-library/jest-native`
     devDependencies'e) ve CI'a ekle → [[yayin-engelleri]] E6
+    - Ayrıca `npm run lint` için eslint + yapılandırma dosyası eklenmeli (şu an ikisi de yok)
 12. **App Store Connect metadata** — açıklama, anahtar kelimeler, kategori, yaş derecelendirmesi
 
 ## 🟢 FAZ C — Build & Submit

@@ -72,6 +72,13 @@ class ApiClient {
         return this.request('/auth/logout', { method: 'POST' });
     }
 
+    async deleteAccount(password: string) {
+        return this.request<{ message: string }>('/auth/account', {
+            method: 'DELETE',
+            body: JSON.stringify({ password }),
+        });
+    }
+
     async getMe() {
         return this.request<User>('/auth/me');
     }

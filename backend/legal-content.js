@@ -122,8 +122,8 @@ const PRIVACY_BODY = `
 <p>Tüm hesap ve uygulama verileriniz, kendi barındırdığımız sunucuda (Türkiye) bir PostgreSQL veritabanında saklanır. Sunucuya erişim HTTPS/TLS ile şifrelenir; veritabanı yalnızca uygulama sunucusundan erişilebilir, internete açık değildir. AI dışındaki veri işlemleri bu sunucuda gerçekleşir.</p>
 
 <h2>6. Veri Saklama ve Silme</h2>
-<p>Hesabınızı silmek istediğinizde hesabınıza ait görevler, odak oturumları, enerji kayıtları ve istatistikler veritabanından ilişkisel olarak (cascade delete) silinir; talep <strong>7 gün içinde</strong> tamamlanır. Hesabınız aktif olduğu sürece veriler saklanır. 90 gün boyunca giriş yapılmayan hesaplar bilgilendirilir ve ardından silinir.</p>
-<p>Silme talebi için bölüm 10'daki iletişim adresine yazabilirsiniz.</p>
+<p>Hesabınızı <strong>uygulama içinden</strong> silebilirsiniz: Profil → Hesabımı Sil. Onay için parolanızı girmeniz istenir. Silme işlemi anında gerçekleşir; hesabınıza ait görevler, odak oturumları, enerji kayıtları, istatistikler ve hesap bilgileri veritabanından ilişkisel olarak (cascade delete) kaldırılır. Cihazınızda kalan oturum anahtarı ve çevrimdışı kopyalar da temizlenir.</p>
+<p>Dilerseniz bölüm 10'daki iletişim adresine yazarak da silme talep edebilirsiniz; bu durumda talep <strong>7 gün içinde</strong> tamamlanır. Hesabınız aktif olduğu sürece veriler saklanır. 90 gün boyunca giriş yapılmayan hesaplar bilgilendirilir ve ardından silinir.</p>
 
 <h2>7. Çocukların Gizliliği</h2>
 <p>FlowMind 13 yaş altı çocuklar için tasarlanmamıştır. 13 yaş altı bir kullanıcıdan bilerek veri toplamayız; bu durumu fark ettiğimizde hesabı ve ilgili verileri sileriz.</p>
@@ -204,8 +204,8 @@ Geliştirici: ${DEVELOPER}</p>
 <p>All account and app data is stored in a PostgreSQL database on a server we host ourselves (Türkiye). Access to the server is encrypted with HTTPS/TLS, and the database is reachable only from the application server, not from the public internet. All non-AI data processing happens on that server.</p>
 
 <h2>6. Retention and Deletion</h2>
-<p>When you delete your account, your tasks, focus sessions, energy logs and statistics are removed from the database by cascade delete, and the request is completed within <strong>7 days</strong>. Data is retained while your account is active. Accounts inactive for 90 days are notified and then deleted.</p>
-<p>To request deletion, contact us at the address in section 10.</p>
+<p>You can delete your account <strong>inside the app</strong>: Profile → Delete My Account. You will be asked for your password to confirm. Deletion is immediate: your tasks, focus sessions, energy logs, statistics and account details are removed from the database by cascade delete. The session key and offline copies stored on your device are cleared as well.</p>
+<p>You may also request deletion by writing to the address in section 10; in that case the request is completed within <strong>7 days</strong>. Data is retained while your account is active. Accounts inactive for 90 days are notified and then deleted.</p>
 
 <h2>7. Children's Privacy</h2>
 <p>FlowMind is not designed for children under 13. We do not knowingly collect data from anyone under 13; if we discover such an account we delete it and its data.</p>
@@ -392,7 +392,7 @@ const SUPPORT_BODY = `
 <div class="card">
   <h2>Sık Sorulan Sorular</h2>
   <h3>Hesabımı nasıl silerim?</h3>
-  <p>Yukarıdaki e-posta adresine yazın; hesabınız ve tüm verileriniz 7 gün içinde kalıcı olarak silinir. Verilen verilerin kapsamı için <a href="/privacy">Gizlilik Politikası</a> bölüm 6'ya bakın.</p>
+  <p>Profil → <strong>Hesabımı Sil</strong> yolundan uygulama içinden silebilirsiniz; silme anında gerçekleşir. Alternatif olarak yukarıdaki e-posta adresine yazabilirsiniz; bu durumda 7 gün içinde tamamlanır. Nelerin silindiği için <a href="/privacy">Gizlilik Politikası</a> bölüm 6'ya bakın.</p>
   <h3>Şifremi unuttum.</h3>
   <p>Otomatik parola sıfırlama henüz yok. E-posta gönderin; hesabınız için size özel bir bağlantı ile parolanızı sıfırlamanızı sağlarız.</p>
   <h3>AI önerileri gelmiyor.</h3>
@@ -417,7 +417,7 @@ const SUPPORT_BODY = `
 <div class="card">
   <h2>Frequently Asked Questions</h2>
   <h3>How do I delete my account?</h3>
-  <p>Email the address above; your account and all of its data are permanently deleted within 7 days. See section 6 of the <a href="/privacy">Privacy Policy</a> for what is covered.</p>
+  <p>Inside the app: Profile → <strong>Delete My Account</strong>. Deletion is immediate. Alternatively email the address above and it is completed within 7 days. See section 6 of the <a href="/privacy">Privacy Policy</a> for what is covered.</p>
   <h3>I forgot my password.</h3>
   <p>Self-serve reset is not available yet. Email us and we will send you a personal link to reset your password.</p>
   <h3>AI suggestions are not loading.</h3>

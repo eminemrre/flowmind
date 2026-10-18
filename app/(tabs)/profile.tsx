@@ -22,15 +22,17 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { GlowOrb } from '@/components/ui/GlowOrb';
 import { apiClient } from '@/lib/api';
 import { Button } from '@/components/ui/Button';
+import DeleteAccountModal from '@/components/DeleteAccountModal';
 
 export default function ProfileScreen() {
-    const { user, logout, checkAuth } = useAuthStore();
+    const { user, logout, checkAuth, deleteAccount } = useAuthStore();
     const { theme, isDark } = useTheme();
     const styles = useThemedStyles(createStyles);
 
     const [isEditing, setIsEditing] = useState(false);
     const [name, setName] = useState(user?.name || '');
     const [loading, setLoading] = useState(false);
+    const [isDeleteAccountVisible, setIsDeleteAccountVisible] = useState(false);
 
     // Mock settings state
     const [notificationsEnabled, setNotificationsEnabled] = useState(true);
@@ -52,6 +54,15 @@ export default function ProfileScreen() {
                 },
             ]
         );
+    };
+
+    const handleDeleteAccount = async (password: string) => {
+        const result = await deleteAccount(password);
+        if (result.success) {
+            setIsDeleteAccountVisible(false);
+            router.replace('/(auth)/login');
+        }
+        return result;
     };
 
     const handleUpdateProfile = async () => {
@@ -216,6 +227,20 @@ export default function ProfileScreen() {
                     </TouchableOpacity>
                 </View>
 
+                {/* Account Section */}
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>Hesap</Text>
+                    <TouchableOpacity
+                        style={styles.menuItem}
+                        onPress={() => setIsDeleteAccountVisible(true)}
+                        accessibilityRole="button"
+                        accessibilityLabel="Hesabımı sil"
+                    >
+                        <Ionicons name="trash-outline" size={24} color={theme.colors.error} />
+                        <Text style={[styles.menuText, { color: theme.colors.error }]}>Hesabımı Sil</Text>
+                    </TouchableOpacity>
+                </View>
+
                 <Button
                     title="Çıkış Yap"
                     onPress={handleLogout}
@@ -226,6 +251,12 @@ export default function ProfileScreen() {
 
                 <Text style={styles.version}>v1.0.0 (Build 2026.02)</Text>
             </ScrollView>
+
+            <DeleteAccountModal
+                visible={isDeleteAccountVisible}
+                onClose={() => setIsDeleteAccountVisible(false)}
+                onConfirm={handleDeleteAccount}
+            />
         </SafeAreaView>
     );
 }

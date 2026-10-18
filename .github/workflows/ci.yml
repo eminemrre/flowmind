@@ -29,6 +29,9 @@ jobs:
       DATABASE_URL: postgresql://flowmind:flowmind_test@localhost:5432/flowmind_test
       JWT_SECRET: test-jwt-secret-key
       NODE_ENV: test
+      # Testler aynı IP'den çok sayıda auth isteği yapar; varsayılan 10 sınırı
+      # suite büyüdükçe 429 üretir. Üretimde varsayılan değişmez.
+      AUTH_RATE_LIMIT_MAX: '200'
 
     steps:
       - uses: actions/checkout@v4

@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const db = require('../config/database');
 const { auth } = require('../middleware/auth');
+const logger = require('../utils/logger');
 
 const router = express.Router();
 
@@ -150,9 +151,42 @@ router.patch('/profile', auth, async (req, res, next) => {
 });
 
 // Logout (client-side token removal, just update last_active)
-router.post('/logout', auth, async (req, res) => {
+router.post('/logout', auth, async (req, res, next) => {
     await db.query('UPDATE users SET last_active_at = NOW() WHERE id = $1', [req.user.id]);
     res.json({ message: 'Logged out' });
+});
+
+// Delete account — App Store Review 5.1.1(v) gereği uygulama içinden silme.
+// Parola ile onay istenir: yıkıcı ve geri alınamaz bir işlem.
+// İlişkili kayıtlar (görevler, odak oturumları, enerji, başarımlar, tercihler,
+// abonelik) şemadaki ON DELETE CASCADE ile birlikte silinir.
+router.delete('/account', auth, async (req, res, next) => {
+    try {
+        const { password } = req.body || {};
+
+        if (!password) {
+            return res.status(400).json({ message: 'Password required' });
+        }
+
+        const result = await db.query('SELECT password FROM users WHERE id = $1', [req.user.id]);
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const isValid = await bcrypt.compare(password, result.rows[0].password);
+        if (!isValid) {
+            return res.status(401).json({ message: 'Invalid password' });
+        }
+
+        await db.query('DELETE FROM users WHERE id = $1', [req.user.id]);
+
+        // Silme kanıtı için PII içermeyen kayıt (kimlik zaten yok edildi)
+        logger.info(`Account deleted: user ${req.user.id}`);
+
+        res.json({ message: 'Account deleted' });
+    } catch (error) {
+        next(error);
+    }
 });
 
 module.exports = router;

@@ -32,9 +32,10 @@ app.use((req, res, next) => {
 });
 
 // Simple in-memory rate limiting (improved logging)
+// Sınırlar ortam değişkeniyle ayarlanabilir (test/CI ve kapasite ayarı için).
 const rateLimitMap = new Map();
 const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
-const RATE_LIMIT_MAX = 100; // max requests per window
+const RATE_LIMIT_MAX = parseInt(process.env.RATE_LIMIT_MAX || '100', 10); // max requests per window
 
 const rateLimit = (req, res, next) => {
     const ip = req.ip || req.connection.remoteAddress;
@@ -64,7 +65,7 @@ const rateLimit = (req, res, next) => {
 app.use('/api', rateLimit);
 
 // Stricter rate limit for auth endpoints
-const AUTH_RATE_LIMIT_MAX = 10;
+const AUTH_RATE_LIMIT_MAX = parseInt(process.env.AUTH_RATE_LIMIT_MAX || '10', 10);
 const authRateLimit = (req, res, next) => {
     const ip = req.ip || req.connection.remoteAddress;
     const key = `auth_${ip}`;

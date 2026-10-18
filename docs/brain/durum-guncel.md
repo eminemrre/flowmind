@@ -27,17 +27,26 @@ Proje 2026-06-25'ten beri dokunulmamış. Repo analiz edildi, aşağıdakiler
 | `npx expo-doctor` | ✅ 17/18 (2 patch sürüm geride: `expo`, `expo-constants`) |
 | `expo config --type introspect` | ✅ `UIBackgroundModes: ['fetch']` kurulu — arka plan sayacı iOS'ta çalışır |
 | AI anahtarı | ✅ yalnız sunucuda (`backend/routes/ai.js`, `auth` korumalı) |
-| `POST /privacy /terms /support` | ✅ üçü de doğru içerikle 200 dönüyor |
+| `GET /privacy /terms /support` | ✅ üçü de doğru içerikle 200 dönüyor |
+| `DELETE /api/auth/account` | ✅ token yok → 401, parola yok → 400 |
 | `npm test` (kök) | ❌ `jest: command not found` → [[yayin-engelleri]] E6 |
+| Backend testleri | ❌ `/api` ön eki eksikti, hepsi 404 → düzeltildi (E6) |
+| `gh run list` | ❌ **son 12 CI koşusunun tamamı `failure`** → sebep E6 |
 | Backend erişilebilirliği | ❌ timeout → [[yayin-engelleri]] E3 |
 
 ## 📌 Aynı gün kapatılan işler
 
-Legal metinler tek kaynağa indirildi, `/terms` düzeltildi, README ve
-`docker-compose` hataları giderildi. Ayrıntılı liste: [[yayin-engelleri]] →
-"kapatılanlar".
+**Legal/doküman:** legal metinler tek kaynağa indirildi (`backend/legal-content.js`
++ `npm run legal:sync`), `/terms` düzeltildi, README ve `docker-compose` hataları
+giderildi, `setup-vds.sh` temizlendi, `docs/brain` güncellendi.
+
+**Özellik:** uygulama içinden hesap silme eklendi (Apple 5.1.1(v)) —
+`DELETE /api/auth/account`, `DeleteAccountModal`, store aksiyonu, testler ve
+hukuki metin güncellemesi.
+
+Ayrıntılı liste: [[yayin-engelleri]] → "kapatılanlar".
 
 ## ▶️ Sıradaki iş
 
-[[yayin-engelleri]] — sırayla **E1 (uygulama içinden hesap silme)** ve
-**E2 (legal URL host kararı)**. İkisi de Apple incelemesini doğrudan etkiliyor.
+[[yayin-engelleri]] — sırayla **E2 (legal URL host kararı)** ve **E3 (backend'i
+ayağa kaldır)**. Ardından CI'ı yeşile çeviren E6 doğrulaması.

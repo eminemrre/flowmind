@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import * as SecureStore from 'expo-secure-store';
 import { User, UserPreferences, Subscription } from '@/types';
 import { apiClient } from '@/lib/api';
+import { cacheTasks, clearPendingActions } from '@/lib/offlineStore';
 
 const TOKEN_KEY = 'flowmind_auth_token';
 const USER_KEY = 'flowmind_user_data';
@@ -19,6 +20,7 @@ interface AuthState {
     login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
     register: (email: string, password: string, name: string) => Promise<{ success: boolean; error?: string }>;
     logout: () => Promise<void>;
+    deleteAccount: (password: string) => Promise<{ success: boolean; error?: string }>;
     restoreSession: () => Promise<void>;
     checkAuth: () => Promise<void>;
     setUser: (user: User | null) => void;
@@ -123,6 +125,46 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             hasCompletedOnboarding: false,
             isLoading: false,
         });
+    },
+
+    // Delete account (App Store 5.1.1(v)) — sunucudaki tüm veriler silinir,
+    // ardından cihazdaki oturum ve çevrimdışı kopyalar temizlenir.
+    deleteAccount: async (password: string) => {
+        try {
+            const { error } = await apiClient.deleteAccount(password);
+
+            if (error) {
+                // Sunucu hatasını kullanıcıya anlaşılır biçimde ilet
+                if (error === 'Invalid password') {
+                    return { success: false, error: 'Parola hatalı.' };
+                }
+                if (error === 'Password required') {
+                    return { success: false, error: 'Parolanızı girin.' };
+                }
+                return { success: false, error: 'Hesap silinemedi. Lütfen tekrar deneyin.' };
+            }
+
+            await SecureStore.deleteItemAsync(TOKEN_KEY);
+            await SecureStore.deleteItemAsync(USER_KEY);
+            apiClient.setToken(null);
+
+            // Cihazda kalan kullanıcı verisi
+            await cacheTasks([]);
+            await clearPendingActions();
+
+            set({
+                user: null,
+                preferences: null,
+                subscription: null,
+                isAuthenticated: false,
+                hasCompletedOnboarding: false,
+                isLoading: false,
+            });
+
+            return { success: true };
+        } catch {
+            return { success: false, error: 'Bağlantı hatası. Lütfen tekrar deneyin.' };
+        }
     },
 
     // Restore session on app start

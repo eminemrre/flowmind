@@ -23,7 +23,7 @@ updated: 2026-10-18
 
 | Rota | Sorumluluk | Bağlı |
 |---|---|---|
-| `auth.js` | register / login / me / profile / logout | [[mimari-state-zustand]] |
+| `auth.js` | register / login / me / profile / logout / **account (DELETE)** | [[mimari-state-zustand]] |
 | `tasks.js` | görev CRUD + complete | [[ozellik-gorev-yonetimi]] |
 | `recurring.js` | tekrarlayan görevler | [[ozellik-gorev-yonetimi]] |
 | `focus.js` | odak oturumları | [[ozellik-enerji-ve-odak]] |
@@ -34,9 +34,10 @@ updated: 2026-10-18
 | `ai.js` | OpenRouter proxy (`POST /chat`, auth korumalı) | [[mimari-ai]] |
 | `legal.js` | `/privacy`, `/terms`, `/support` (içerik `backend/legal-content.js`) | [[yayin-engelleri]] |
 
-⚠️ **Eksik rota:** `DELETE /auth/account` yok. Apple uygulama içinden hesap silme
-ister → [[yayin-engelleri]] E1. Şemadaki `ON DELETE CASCADE` sayesinde tek bir
-`DELETE FROM users WHERE id=$1` yeterli olacak.
+✅ **Hesap silme eklendi** (2026-10-18): `DELETE /api/auth/account` — auth korumalı,
+parola onaylı; şemadaki `ON DELETE CASCADE` sayesinde tek `DELETE FROM users WHERE id=$1`
+görevleri, odak oturumlarını, enerji kayıtlarını, başarımları, tercihleri ve aboneliği
+birlikte siler (gerçek Postgres motorunda doğrulandı). Apple 5.1.1(v) → [[yayin-engelleri]] E1
 
 ## DB şeması (`config/schema.sql`)
 

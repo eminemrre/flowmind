@@ -18,7 +18,7 @@ describe('Task Endpoints', () => {
 
         // Register user
         const res = await request(app)
-            .post('/auth/register')
+            .post('/api/auth/register')
             .send(testUser);
 
         token = res.body.token;
@@ -34,7 +34,7 @@ describe('Task Endpoints', () => {
 
     it('should create a new task', async () => {
         const res = await request(app)
-            .post('/tasks')
+            .post('/api/tasks')
             .set('Authorization', `Bearer ${token}`)
             .send({
                 title: 'Test Task',
@@ -51,7 +51,7 @@ describe('Task Endpoints', () => {
 
     it('should get all tasks', async () => {
         const res = await request(app)
-            .get('/tasks')
+            .get('/api/tasks')
             .set('Authorization', `Bearer ${token}`);
 
         expect(res.statusCode).toEqual(200);
@@ -62,14 +62,14 @@ describe('Task Endpoints', () => {
     it('should update a task', async () => {
         // First create a task
         const createRes = await request(app)
-            .post('/tasks')
+            .post('/api/tasks')
             .set('Authorization', `Bearer ${token}`)
             .send({ title: 'Task to Update' });
 
         const taskId = createRes.body.id;
 
         const res = await request(app)
-            .patch(`/tasks/${taskId}`)
+            .patch(`/api/tasks/${taskId}`)
             .set('Authorization', `Bearer ${token}`)
             .send({ is_completed: true });
 
@@ -80,14 +80,14 @@ describe('Task Endpoints', () => {
     it('should delete a task', async () => {
         // First create a task
         const createRes = await request(app)
-            .post('/tasks')
+            .post('/api/tasks')
             .set('Authorization', `Bearer ${token}`)
             .send({ title: 'Task to Delete' });
 
         const taskId = createRes.body.id;
 
         const res = await request(app)
-            .delete(`/tasks/${taskId}`)
+            .delete(`/api/tasks/${taskId}`)
             .set('Authorization', `Bearer ${token}`);
 
         expect(res.statusCode).toEqual(200);
