@@ -1,50 +1,178 @@
+<!-- ÜRETİLMİŞ DOSYA — elle düzenlemeyin.
+     Kaynak: backend/legal-content.js
+     Güncellemek için: npm run legal:sync
+     Bu dosya, hukuki sayfaları backend'den bağımsız bir statik host'ta
+     (örn. GitHub Pages) yayınlamak istendiğinde kullanılır.
+     Kanonik/kullanılan sürüm backend'in servis ettiği: /terms -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FlowMind AI - Kullanım Koşulları</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; color: #1a1a2e; background: #f8fafc; padding: 24px; max-width: 800px; margin: 0 auto; }
-        h1 { font-size: 28px; margin-bottom: 8px; color: #6366F1; }
-        h2 { font-size: 20px; margin: 24px 0 8px; color: #1e293b; }
-        p, li { font-size: 15px; margin-bottom: 8px; color: #475569; }
-        ul { padding-left: 20px; }
-        .date { color: #94a3b8; font-size: 13px; margin-bottom: 24px; }
-        hr { border: none; border-top: 1px solid #e2e8f0; margin: 24px 0; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlowMind — Kullanım Koşulları / Terms of Service</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 720px; margin: 0 auto; padding: 32px 20px 64px; color: #1F2937; line-height: 1.65; background: #FFFFFF; }
+  h1 { color: #6366F1; border-bottom: 2px solid #E5E7EB; padding-bottom: 8px; font-size: 26px; line-height: 1.3; }
+  h2 { color: #4F46E5; margin-top: 32px; font-size: 19px; }
+  h3 { color: #1F2937; margin-top: 22px; font-size: 16px; }
+  .updated { color: #6B7280; font-size: 14px; }
+  .lang-switch { background: #F3F4F6; padding: 12px 16px; border-radius: 8px; margin-bottom: 24px; font-size: 14px; }
+  .lang-switch a { margin-right: 14px; }
+  .card { background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; margin: 16px 0; }
+  ul { padding-left: 24px; }
+  li { margin: 6px 0; }
+  a { color: #6366F1; }
+  hr { margin: 48px 0; border: 0; border-top: 1px solid #E5E7EB; }
+  footer { margin-top: 40px; font-size: 13px; color: #9CA3AF; }
+  @media (prefers-color-scheme: dark) {
+    body { background: #0B0B14; color: #E5E7EB; }
+    h1 { color: #A5B4FC; border-bottom-color: #27273A; }
+    h2 { color: #818CF8; }
+    h3 { color: #E5E7EB; }
+    .updated { color: #9CA3AF; }
+    .lang-switch { background: #16162A; }
+    .card { background: #14142A; border-color: #27273A; }
+    a { color: #A5B4FC; }
+    hr { border-top-color: #27273A; }
+    footer { color: #6B7280; }
+  }
+</style>
 </head>
 <body>
-    <h1>FlowMind AI — Kullanım Koşulları</h1>
-    <p class="date">Son güncelleme: 14 Şubat 2026</p>
 
-    <h2>1. Hizmet Tanımı</h2>
-    <p>FlowMind AI, yapay zeka destekli bir verimlilik uygulamasıdır. Görev yönetimi, odaklanma zamanlayıcısı ve kişiselleştirilmiş üretkenlik önerileri sunar.</p>
+<div class="lang-switch">
+  <a href="#tr">🇹🇷 Türkçe</a><a href="#en">🇬🇧 English</a>
+  <a href="/privacy">Gizlilik Politikası</a><a href="/support">Destek</a>
+</div>
 
-    <h2>2. Hesap Sorumlulukları</h2>
-    <ul>
-        <li>Hesabınızın güvenliğinden siz sorumlusunuz</li>
-        <li>Doğru bilgi vermeniz beklenmektedir</li>
-        <li>Hesabınızı kötü amaçla kullanamazsınız</li>
-    </ul>
+<h1 id="tr">FlowMind — Kullanım Koşulları</h1>
+<p class="updated">Son güncelleme: 18 Ekim 2026</p>
 
-    <h2>3. AI Önerileri</h2>
-    <p>FlowMind AI'nın sunduğu öneriler bilgilendirme amaçlıdır. Profesyonel tavsiye niteliği taşımaz. AI önerilerini kendi sorumluluğunuzda kullanırsınız.</p>
+<p>Bu koşullar, FlowMind mobil uygulamasını ("uygulama") kullanımınızı düzenler. Uygulamayı kullanarak bu koşulları kabul etmiş olursunuz. Kabul etmiyorsanız uygulamayı kullanmayın.</p>
 
-    <h2>4. Fikri Mülkiyet</h2>
-    <p>FlowMind AI uygulamasının tüm hakları saklıdır. Uygulamayı kopyalayamaz, tersine mühendislik uygulayamaz veya ticari amaçla kullanamazsınız.</p>
+<h2>1. Hizmetin Tanımı</h2>
+<p>FlowMind, görev yönetimi, enerji takibi, odaklanma (Pomodoro) zamanlayıcısı, istatistik ve yapay zekâ destekli planlama özellikleri sunan bir verimlilik uygulamasıdır. Geliştirici: Emin Emre — Denizli, Türkiye.</p>
 
-    <h2>5. Sorumluluk Sınırlaması</h2>
-    <p>FlowMind AI, uygulamanın kullanımından kaynaklanan doğrudan veya dolaylı zararlardan sorumlu tutulamaz.</p>
+<h2>2. Hesabınız ve Sorumluluklarınız</h2>
+<ul>
+  <li>Hesabınızın ve parolanızın güvenliğinden siz sorumlusunuz.</li>
+  <li>Kayıt sırasında doğru bilgi vermeniz beklenir.</li>
+  <li>Hesabınızı başkalarına devredemez, satamaz veya kiralayamazsınız.</li>
+  <li>Tek kişilik kullanım içindir; otomatik yollarla toplu hesap oluşturamazsınız.</li>
+</ul>
 
-    <h2>6. Değişiklikler</h2>
-    <p>Bu koşulları önceden bildirmeksizin güncelleme hakkımız saklıdır. Güncellemeler bu sayfada yayınlanır.</p>
+<h2>3. Yapay Zekâ Önerileri</h2>
+<p>Uygulamadaki yapay zekâ çıktıları yalnızca <strong>bilgilendirme ve öneri</strong> amaçlıdır; tıbbi, psikolojik, hukuki veya finansal profesyonel tavsiye niteliği taşımaz. Üretilen metinler hatalı veya eksik olabilir. Kararlarınızın sorumluluğu size aittir.</p>
+<p>AI özelliğini kullanırken sağlık verisi, kimlik numarası, parola veya üçüncü kişilere ait özel bilgi gibi hassas içerik girmemelisiniz (bkz. Gizlilik Politikası bölüm 4).</p>
 
-    <h2>7. İletişim</h2>
-    <p>Sorularınız için: <strong>support@flowmind.app</strong></p>
+<h2>4. Kabul Edilemez Kullanım</h2>
+<ul>
+  <li>Uygulamayı yasa dışı amaçlarla kullanmak</li>
+  <li>Sunuculara aşırı yük bindirmek, otomatik istek göndermek veya güvenlik önlemlerini aşmaya çalışmak</li>
+  <li>Başka kullanıcıların hesaplarına veya verilerine erişmeye çalışmak</li>
+  <li>Uygulamayı tersine mühendislikle çözmek, kopyalamak veya izinsiz dağıtmak</li>
+</ul>
+<p>Bu kurallara aykırı kullanımda hesabınız askıya alınabilir veya kapatılabilir.</p>
 
-    <hr>
-    <p style="font-size: 13px; color: #94a3b8;">© 2026 FlowMind AI. Tüm hakları saklıdır.</p>
+<h2>5. Ücretsiz Kullanım</h2>
+<p>FlowMind şu anda ücretsizdir ve uygulama içi satın alma ya da otomatik yenilenen abonelik içermez. İleride ücretli bir plan sunulursa, fiyat, süre, yenilenme ve iptal koşulları bu sayfada ve satın alma ekranında açıkça belirtilir; bu koşullar da güncellenir.</p>
+
+<h2>6. Fikri Mülkiyet</h2>
+<p>Uygulamanın kodu, tasarımı, markası ve içeriği geliştiriciye aittir ve telif hakkı ile korunur. Bu koşullar size yalnızca kişisel, devredilemez ve münhasır olmayan bir kullanım lisansı verir.</p>
+
+<h2>7. Hizmetin Sürekliliği ve Değişiklikler</h2>
+<p>Özellikleri geliştirebilir, değiştirebilir veya kaldırabiliriz. Hizmetin kesintisiz çalışacağını garanti etmiyoruz; bakım, güncelleme veya teknik arıza nedeniyle hizmet geçici olarak kullanılamayabilir. Bu koşulları güncellediğimizde yukarıdaki tarih değişir.</p>
+
+<h2>8. Hesabın Kapatılması ve Fesih</h2>
+<p>Hesabınızı istediğiniz zaman silebilirsiniz; silme talebiniz 7 gün içinde işleme alınır. Koşulları ihlal etmeniz durumunda erişiminizi askıya alabilir veya sonlandırabiliriz.</p>
+
+<h2>9. Sorumluluğun Sınırlandırılması</h2>
+<p>Uygulama "olduğu gibi" sunulur. Yasaların izin verdiği azami ölçüde; uygulamanın kullanımından doğan dolaylı, arızi veya sonuçsal zararlar ile veri kaybı, kâr veya iş kaybı için sorumluluk kabul etmiyoruz. Bu hüküm, tüketici mevzuatından doğan ve sözleşmeyle sınırlandırılamayan haklarınızı etkilemez.</p>
+
+<h2>10. Uygulanacak Hukuk</h2>
+<p>Bu koşullar Türkiye Cumhuriyeti hukukuna tabidir. Uyuşmazlıklarda Türkiye'deki yetkili mahkeme ve tüketici hakem heyetleri yetkilidir; tüketici olarak kendi yerleşim yerindeki mercilere başvurma hakkınız saklıdır.</p>
+
+<h2>11. Apple App Store — Ek Hükümler</h2>
+<p>Uygulamayı Apple App Store üzerinden edindiyseniz, aşağıdaki hükümler Apple'ın asgari lisans koşulları gereği ayrıca geçerlidir:</p>
+<ol>
+  <li>Bu koşullar yalnızca sizinle geliştirici arasındadır; Apple değil. Uygulama ve içeriğinden yalnızca geliştirici sorumludur.</li>
+  <li>Size verilen lisans, Apple'ın Kullanım Kuralları'na (Usage Rules) tabi olarak Apple markalı cihazlarda kullanım için verilen devredilemez bir lisanstır.</li>
+  <li>Bakım ve destek yükümlülüğü yalnızca geliştiriciye aittir; Apple'ın bu konuda yükümlülüğü yoktur.</li>
+  <li>Uygulamaya ilişkin garanti yükümlülükleri geliştiriciye aittir. Uygulama geçerli bir garantiye uymazsa, kullanıcı Apple'a bildirimde bulunarak (varsa) ödediği bedelin iadesini talep edebilir; Apple'ın bunun ötesinde garanti yükümlülüğü yoktur.</li>
+  <li>Uygulamaya ilişkin ürün ve tüketici talepleri, yasal düzenlemelere uygunluk iddiaları ve fikri mülkiyet ihlali iddiaları geliştirici tarafından karşılanır.</li>
+  <li>Kullanıcı, ambargo uygulanan bir ülkede bulunmadığını ve yasaklı kişi listelerinde yer almadığını beyan eder.</li>
+  <li>Apple ve bağlı şirketleri bu koşulların üçüncü taraf lehdarıdır ve bu koşulları size karşı uygulama hakkına sahiptir.</li>
+</ol>
+
+<h2>12. İletişim</h2>
+<p>Sorularınız için: <a href="mailto:emin3619@gmail.com">emin3619@gmail.com</a></p>
+
+<hr>
+
+<h1 id="en">FlowMind — Terms of Service</h1>
+<p class="updated">Last updated: October 18, 2026</p>
+
+<p>These terms govern your use of the FlowMind mobile application ("the app"). By using the app you accept these terms. If you do not accept them, do not use the app.</p>
+
+<h2>1. Description of Service</h2>
+<p>FlowMind is a productivity app offering task management, energy tracking, a focus (Pomodoro) timer, statistics and AI-assisted planning. Developer: Emin Emre — Denizli, Türkiye.</p>
+
+<h2>2. Your Account and Responsibilities</h2>
+<ul>
+  <li>You are responsible for the security of your account and password.</li>
+  <li>You are expected to provide accurate information at registration.</li>
+  <li>You may not transfer, sell or rent your account.</li>
+  <li>The service is for single-user use; you may not create accounts in bulk by automated means.</li>
+</ul>
+
+<h2>3. AI Suggestions</h2>
+<p>AI output in the app is for <strong>informational and suggestion</strong> purposes only and is not medical, psychological, legal or financial advice. Generated text may be wrong or incomplete. You remain responsible for your decisions.</p>
+<p>When using AI features, do not enter sensitive content such as health data, national ID numbers, passwords or other people's private information (see section 4 of the Privacy Policy).</p>
+
+<h2>4. Acceptable Use</h2>
+<ul>
+  <li>Do not use the app for unlawful purposes.</li>
+  <li>Do not overload our servers, send automated requests, or attempt to bypass security measures.</li>
+  <li>Do not attempt to access other users' accounts or data.</li>
+  <li>Do not reverse engineer, copy or redistribute the app without permission.</li>
+</ul>
+<p>We may suspend or close your account for breaching these rules.</p>
+
+<h2>5. Free Use</h2>
+<p>FlowMind is currently free and contains no in-app purchases or auto-renewing subscriptions. If a paid plan is introduced in the future, its price, duration, renewal and cancellation terms will be stated clearly on this page and in the purchase screen, and these terms will be updated.</p>
+
+<h2>6. Intellectual Property</h2>
+<p>The app's code, design, brand and content belong to the developer and are protected by copyright. These terms grant you only a personal, non-transferable, non-exclusive licence to use the app.</p>
+
+<h2>7. Availability and Changes</h2>
+<p>We may improve, change or remove features. We do not guarantee uninterrupted service; the service may be temporarily unavailable due to maintenance, updates or technical failure. When we update these terms, the date above changes.</p>
+
+<h2>8. Account Closure and Termination</h2>
+<p>You may delete your account at any time; deletion requests are processed within 7 days. If you breach these terms we may suspend or terminate your access.</p>
+
+<h2>9. Limitation of Liability</h2>
+<p>The app is provided "as is". To the maximum extent permitted by law, we are not liable for indirect, incidental or consequential damages arising from your use of the app, or for loss of data, profit or business. This does not affect rights you have under consumer law that cannot be limited by agreement.</p>
+
+<h2>10. Governing Law</h2>
+<p>These terms are governed by the laws of the Republic of Türkiye. The competent courts and consumer arbitration boards in Türkiye have jurisdiction; as a consumer you keep the right to bring proceedings in your place of residence.</p>
+
+<h2>11. Apple App Store — Additional Terms</h2>
+<p>If you obtained the app through the Apple App Store, the following applies as required by Apple's minimum licence terms:</p>
+<ol>
+  <li>These terms are between you and the developer only, not with Apple. The developer, not Apple, is solely responsible for the app and its content.</li>
+  <li>The licence granted is a non-transferable licence to use the app on Apple-branded devices, subject to Apple's Usage Rules.</li>
+  <li>Maintenance and support are the developer's sole responsibility; Apple has no obligation to provide them.</li>
+  <li>Any warranty obligations for the app rest with the developer. If the app fails to conform to an applicable warranty, you may notify Apple for a refund of the purchase price (if any); Apple has no other warranty obligation.</li>
+  <li>Product and consumer claims, claims of non-compliance with law, and intellectual property infringement claims are the developer's responsibility.</li>
+  <li>You represent that you are not located in a country subject to an embargo and are not on any prohibited-party list.</li>
+  <li>Apple and its subsidiaries are third-party beneficiaries of these terms and may enforce them against you.</li>
+</ol>
+
+<h2>12. Contact</h2>
+<p>Questions: <a href="mailto:emin3619@gmail.com">emin3619@gmail.com</a></p>
+
+<footer>© 2026 FlowMind</footer>
+
 </body>
 </html>

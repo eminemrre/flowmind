@@ -70,6 +70,18 @@ jobs:
       - name: TypeScript Check
         run: npx tsc --noEmit
 
+      - name: Legal pages in sync
+        run: npm run legal:check
+
+      - name: Secret scan
+        run: |
+          if grep -rInE 'sk-or-v1-[a-f0-9]{32,}' \
+              --exclude-dir=node_modules --exclude-dir=.git .; then
+            echo "::error::An OpenRouter API key looks committed. Revoke it and pass it via environment variables."
+            exit 1
+          fi
+          echo "No committed API keys found."
+
   deploy-backend:
     needs: [backend-test, frontend-lint]
     runs-on: ubuntu-latest

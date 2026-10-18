@@ -38,7 +38,7 @@ eas login
 
 ### Adım 3: Expo Projesini Bağla
 ```bash
-cd /home/emin/flowmind
+cd ~/Projeler/flowmind
 eas init
 ```
 - Bu komut `app.json` içindeki `projectId` alanını otomatik dolduracak
@@ -48,8 +48,12 @@ eas init
 - `name`: "FlowMind" ✅
 - `slug`: "flowmind" ✅
 - `version`: "1.0.0" ✅
-- `ios.bundleIdentifier`: "com.flowmind.app" ✅
-- `android.package`: "com.flowmind.app" ✅
+- `ios.bundleIdentifier`: "com.eminemre.flowmind" ✅
+- `android.package`: "com.eminemre.flowmind" ✅
+
+> ⚠️ Eski notlarda `com.flowmind.app` yazıyordu. Gerçek değer `com.eminemre.flowmind`.
+> Bundle ID App Store Connect'teki uygulamayla birebir eşleşmek zorunda; değiştirmek
+> yeni bir uygulama kaydı gerektirir.
 
 ### Adım 5: Android Build (APK/AAB)
 ```bash
@@ -98,11 +102,12 @@ eas submit --platform android --profile production
 
 #### Manuel Yükleme:
 1. **https://appstoreconnect.apple.com** → Yeni uygulama
-2. Bundle ID: com.flowmind.app
+2. Bundle ID: com.eminemre.flowmind
 3. Uygulama bilgilerini doldur:
    - Başlık, açıklama → `docs/store-description.md`'den kopyala
+     (⚠️ önce "sesli görev" iddiasını düzelt — gerçek değil)
    - Screenshots (en az 3 adet, farklı iPhone boyutları)
-   - Gizlilik politikası URL'i
+   - Gizlilik politikası URL'i (aşağıya bak)
    - Yaş derecelendirmesi
    - İletişim bilgileri
 4. EAS'tan indirdiğin **.ipa** dosyasını **Transporter** uygulamasıyla yükle
@@ -136,12 +141,33 @@ App Store ve Google Play için **ekran görüntüleri** şart:
 
 ---
 
+## ✅ Submit'ten önce kontrol listesi
+
+Bunlar kapanmadan gönderme — ikisi doğrudan red sebebi:
+
+- [ ] **Uygulama içinden hesap silme var mı?** Apple 5.1.1(v) zorunlu kılıyor.
+      "Destek maili atın" yeterli değil. Şu an **yok** → `backend/routes/auth.js`
+      içine `DELETE /auth/account` + profil ekranına buton gerekiyor.
+- [ ] **Gizlilik politikası URL'i çalışıyor mu?** Çalışan bir public URL şart.
+      Üç sayfa backend'den servis ediliyor (`/privacy`, `/terms`, `/support`,
+      içerik: `backend/legal-content.js`); backend ayakta değilse URL de ölür.
+      Alternatif: `npm run legal:sync` ile üretilen `web/*.html` dosyalarını
+      GitHub Pages / Netlify gibi statik bir host'a koy.
+- [ ] **Mağaza metni gerçeği yansıtıyor mu?** `docs/store-description.md`
+      "sesli görev (voice-to-task)" diyor ama uygulamada mikrofon yok, metin kutusu var.
+- [ ] **AI üretimde çalışıyor mu?** Varsayılan model `:free` — kotalı. İnceleme
+      sırasında AI hata verirse "bozuk özellik" reddi gelebilir.
+- [ ] **Privacy Nutrition Label** uygulamayla uyumlu mu? Toplanan veriler:
+      e-posta, ad, kullanıcı içeriği (görevler), kullanım verisi. Reklam/izleme yok.
+      AI için görev metni OpenRouter'a gidiyor — "Third-Party Advertising: Hayır".
+- [ ] Screenshot'lar yeni premium UI ile alındı mı? (iPhone 6.7" + 6.5" + Android)
+
 ## ⚠️ Dikkat Edilmesi Gerekenler
 
-1. **Gizlilik politikası URL'i** şart — `web/privacy-policy.html` dosyasını bir yere host etmen lazım (GitHub Pages, Netlify, vs.)
-2. **App değerlendirme anketi** — "Bu uygulama kullanıcıdan veri topluyor mu?" → Evet (e-posta, görev bilgileri)
-3. **İlk submission** genellikle reddedilir — Apple çok titizdir, geri bildirimi oku ve düzelt
-4. **Test sürümü** önce yayınla — "Internal Testing" ile kendin test et
+1. **App değerlendirme anketi** — "Bu uygulama kullanıcıdan veri topluyor mu?" → Evet (e-posta, görev bilgileri)
+2. **İlk submission** genellikle reddedilir — Apple çok titizdir, geri bildirimi oku ve düzelt
+3. **Test sürümü** önce yayınla — "Internal Testing" ile kendin test et
+4. **Legal metin değişirse** `npm run legal:sync` çalıştır (`npm run legal:check` ayrışmayı yakalar)
 
 ---
 

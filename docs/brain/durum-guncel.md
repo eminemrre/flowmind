@@ -1,60 +1,43 @@
 ---
 title: Güncel Durum — Nerede Kaldık
 type: durum
-tags: [flowmind, durum, wip]
-updated: 2026-06-25
+tags: [flowmind, durum]
+updated: 2026-10-18
 ---
 
 # 📍 Güncel Durum — Nerede Kaldık?
 
-İlgili: [[00-FlowMind-MOC]] · [[gelisim-fazlari]] · [[sonraki-adimlar]]
+İlgili: [[00-FlowMind-MOC]] · [[gelisim-fazlari]] · [[sonraki-adimlar]] · [[yayin-engelleri]]
 
-## 🟢 Son commit (kaydedilmiş)
+## 🟢 Son commit
 
-`7467968 fix(eas): autoIncrement is boolean, not string`
+`5f38d49 Merge feature/premium-ui: premium UI + yeni logo + Faz A sağlamlaştırma`
+(25 Haziran 2026)
 
-Git geçmişi **App Store submission hazırlığında** kaldığımızı gösteriyor:
-EAS yapılandırması, gerçek ikon, `ascAppId` (6772716526), Apple ID, ve
-backend'de `/privacy /terms /support` legal sayfaları eklendi → [[mimari-deployment]]
+Yerel ve `origin/main` aynı. Açık PR/issue yok, başka branch yok.
 
-## ✅ Güncelleme (2026-06-25)
+## 🧊 2026-10-18 — 4 ay sonra ilk analiz
 
-Premium UI artık **tüm ekranlarda** (`feature/premium-ui` branch'i, 3 commit):
-auth + focus zaten vardı; index/tasks/stats/profile/calendar de cybermorphism
-diline getirildi. Yeni App Store ikonu **Girdap Küre** basıldı. `tsc` temiz.
-Sıradaki iş → [[sonraki-adimlar]] (yayın yol haritası).
+Proje 2026-06-25'ten beri dokunulmamış. Repo analiz edildi, aşağıdakiler
+**doğrulandı** (varsayım değil, çalıştırılarak):
 
-## 🟡 İlk redesign çalışması (tarihsel not)
+| Kontrol | Sonuç |
+|---|---|
+| `npx tsc --noEmit` | ✅ temiz |
+| `npx expo-doctor` | ✅ 17/18 (2 patch sürüm geride: `expo`, `expo-constants`) |
+| `expo config --type introspect` | ✅ `UIBackgroundModes: ['fetch']` kurulu — arka plan sayacı iOS'ta çalışır |
+| AI anahtarı | ✅ yalnız sunucuda (`backend/routes/ai.js`, `auth` korumalı) |
+| `POST /privacy /terms /support` | ✅ üçü de doğru içerikle 200 dönüyor |
+| `npm test` (kök) | ❌ `jest: command not found` → [[yayin-engelleri]] E6 |
+| Backend erişilebilirliği | ❌ timeout → [[yayin-engelleri]] E3 |
 
-Bu işin başında premium UI redesign commit'lenmemişti (kayıp riski vardı);
-ilk iş `feature/premium-ui` branch'ine commit'lenerek güvenceye alındı.
+## 📌 Aynı gün kapatılan işler
 
-**Yeni dosyalar (untracked):**
-- `components/ui/GlassCard.tsx` (70 satır) — glassmorphism kart
-- `components/ui/GlowOrb.tsx` (61 satır) — ışıyan arka plan orb'u
-- `components/ui/GradientButton.tsx` (137 satır) — gradient buton
+Legal metinler tek kaynağa indirildi, `/terms` düzeltildi, README ve
+`docker-compose` hataları giderildi. Ayrıntılı liste: [[yayin-engelleri]] →
+"kapatılanlar".
 
-**Değiştirilmiş dosyalar (~1000 satır net değişiklik):**
-| Dosya | Değişim | Anlam |
-|---|---|---|
-| `app/(auth)/login.tsx` | +295 | Giriş ekranı yeniden tasarlandı |
-| `app/(auth)/register.tsx` | +201 | Kayıt ekranı yenilendi |
-| `app/(tabs)/focus.tsx` | +488 | Odak ekranı büyük revizyon |
-| `app/(tabs)/_layout.tsx` | +106 | Tab bar yenilendi |
-| `components/ui/Button.tsx` | +167 | Buton stilleri |
-| `constants/theme.ts` | +222 | Tema sistemi genişletildi |
-| `package.json` | +2 | `expo-blur` + `expo-linear-gradient` |
+## ▶️ Sıradaki iş
 
-## 🧩 Yorum
-
-En son **App Store'a göndermeden önce uygulamaya premium görsel kimlik**
-kazandırma işine başlamışız ([[ozellik-enerji-ve-odak]] focus ekranı dahil).
-Glassmorphism yönü için bkz. `ui-ux-pro-max` skill'i.
-
-## ⚠️ Acil aksiyon
-
-1. **Önce bu çalışmayı commit'le veya WIP branch'e al** — kaybetmemek için.
-2. Redesign'ı diğer ekranlara (tasks, stats, profile, index) yay → tutarlılık.
-3. Sonra App Store submission'ı tamamla.
-
-> İlk öneri: `git switch -c feature/premium-ui && git add -A && git commit -m "wip: premium glassmorphism redesign"`
+[[yayin-engelleri]] — sırayla **E1 (uygulama içinden hesap silme)** ve
+**E2 (legal URL host kararı)**. İkisi de Apple incelemesini doğrudan etkiliyor.

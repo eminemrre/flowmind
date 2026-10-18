@@ -2,36 +2,44 @@
 title: Mimari — AI Katmanı
 type: mimari
 tags: [flowmind, mimari, ai]
-updated: 2026-06-25
+updated: 2026-10-18
 ---
 
-# 🤖 AI Katmanı — OpenRouter + Gemma
+# 🤖 AI Katmanı — Backend Proxy → OpenRouter → Gemma
 
-İlgili: [[mimari-genel]] · [[ozellik-ai-oneriler]] · [[mimari-frontend]]
+İlgili: [[mimari-genel]] · [[ozellik-ai-oneriler]] · [[mimari-backend]] · [[yayin-engelleri]]
 
-## Stack
-
-- **OpenRouter** AI gateway (`lib/ai.ts`)
-- **Gemma-class** modeller (yapılandırılabilir) — git: "model to Google Gemma 3"
-- **AI cache** (`lib/aiCache.ts`) — Faz 6.5'te eklendi, tekrar istekleri azaltır
-- **Fallback** mekanizması — API hatalarında çökmesin
-
-## Sorumluluklar
-
-- Günlük AI öneri / plan üretimi → [[ozellik-ai-oneriler]]
-- Enerji bazlı görev planlama girdisi → [[ozellik-enerji-ve-odak]]
-- Sesli görev (voice-to-task) yorumlama → [[ozellik-ai-oneriler]]
-
-## Akış
+## Akış (2026-06-25'ten beri)
 
 ```
-UI → lib/ai.ts → (aiCache kontrol) → OpenRouter → Gemma
-                      │ cache hit
-                      └────────────► hızlı dönüş
+UI → lib/ai.ts → (aiCache kontrol; 15 dk / 1 saat TTL) → lib/api.ts
+   → POST /api/ai/chat  (JWT korumalı, backend)
+   → backend/routes/ai.js → OpenRouter → Gemma
 ```
 
-## Notlar / Riskler
+**OpenRouter anahtarı yalnız sunucuda** (`OPENROUTER_API_KEY`). İstemcide anahtar
+yok; eski `EXPO_PUBLIC_OPENROUTER_API_KEY` tamamen kaldırıldı. Uygulama paketi
+tersine mühendislikle açılsa bile anahtar çıkmaz.
 
-- Model anahtarı `.env`'de — istemci tarafında AI çağrısı yapılıyorsa anahtar
-  ifşa riski; ideali backend proxy üzerinden. Bkz. [[karar-defteri]].
-- Prompt optimizasyonu ROADMAP'te vardı — durumu doğrulanmalı → [[sonraki-adimlar]]
+## Bileşenler
+
+| Dosya | İş |
+|---|---|
+| `lib/ai.ts` | Prompt'lar, cache, fallback (`getDailyInsight`, `getWeeklyReport`, `getTaskAnalysis`, `getSmartSchedule`, `getMotivation`, `parseVoiceToTask`) |
+| `lib/aiCache.ts` | AsyncStorage tabanlı yanıt önbelleği |
+| `backend/routes/ai.js` | Tek proxy rotası; `OPENROUTER_MODEL` ile model seçilir |
+| `lib/api.ts` → `aiChat()` | İstemci tarafı çağrı |
+
+## Hata davranışı
+
+Anahtar yoksa proxy `503` döner; OpenRouter hata verirse `502`. İki durumda da
+`lib/ai.ts` statik bir fallback metni döndürür — uygulama çökmez, AI dışındaki
+tüm özellikler çalışmaya devam eder.
+
+## Riskler
+
+- **Model `google/gemma-3-4b-it:free`** — ücretsiz tier kotalı. Apple incelemesi
+  sırasında AI'ın çalışmaması "bozuk özellik" reddine yol açabilir → [[yayin-engelleri]] E5
+- **Gizlilik beyanı** — görev metni ve enerji verisi OpenRouter'a gidiyor.
+  Bu 2026-10-18'de gizlilik politikasına yazıldı (`backend/legal-content.js` bölüm 4).
+  AI'ın kapsamı değişirse metin de güncellenmeli.

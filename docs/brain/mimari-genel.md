@@ -2,7 +2,7 @@
 title: Mimari — Genel Bakış
 type: mimari
 tags: [flowmind, mimari]
-updated: 2026-06-25
+updated: 2026-10-18
 ---
 
 # 🏗️ Mimari — Genel Bakış
@@ -40,12 +40,13 @@ updated: 2026-06-25
 | `stores/` | İstemci durumu (Zustand) | [[mimari-state-zustand]] |
 | `lib/` | Servisler (api, ai, cache, notifications, offline, timer) | [[mimari-ai]] |
 | `constants/` | Tema, config | tema genişledi → [[durum-guncel]] |
-| `backend/` | Express API + PostgreSQL | [[mimari-backend]] |
+| `backend/` | Express API + PostgreSQL | legal metinler: `legal-content.js` → [[mimari-backend]] |
 | `hooks/`, `types/` | Yardımcılar, tipler | |
 
 ## İki yönlü veri akışı
 
 UI → Zustand store → `lib/api.ts` → Express → PostgreSQL → geri.
-AI istekleri ayrı: UI → `lib/ai.ts` (`lib/aiCache.ts` ile) → OpenRouter → Gemma.
+AI istekleri de aynı yoldan gider: UI → `lib/ai.ts` (`lib/aiCache.ts` ile) →
+`POST /api/ai/chat` (backend proxy) → OpenRouter → Gemma. İstemcide AI anahtarı yoktur.
 
-> ⚠️ `@supabase/supabase-js` bağımlı ama aktif kullanım belirsiz. Bkz. [[karar-defteri]].
+> ⚠️ Yayına çıkmadan önce kapatılacaklar: [[yayin-engelleri]].

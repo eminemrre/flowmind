@@ -2,7 +2,7 @@
 title: Mimari — Frontend (React Native + Expo)
 type: mimari
 tags: [flowmind, mimari, frontend]
-updated: 2026-06-25
+updated: 2026-10-18
 ---
 
 # 📱 Frontend — React Native + Expo
@@ -23,22 +23,23 @@ updated: 2026-06-25
 ```
 app/
 ├── index.tsx              → açılış / yönlendirme
-├── _layout.tsx            → kök layout
+├── _layout.tsx            → kök layout (bildirim kaydı, offline senkron)
 ├── (onboarding)/welcome   → ilk kullanım
-├── (auth)/login,register  → kimlik (redesign WIP)
+├── (auth)/login,register  → kimlik
 └── (tabs)/
     ├── index    → Today (günlük plan)   → [[ozellik-ai-oneriler]]
     ├── tasks    → Görevler              → [[ozellik-gorev-yonetimi]]
-    ├── focus    → Odak/Pomodoro (WIP)   → [[ozellik-enerji-ve-odak]]
+    ├── focus    → Odak/Pomodoro         → [[ozellik-enerji-ve-odak]]
     ├── stats    → İstatistikler          → [[ozellik-gamification]]
     ├── calendar → Takvim                 → [[ozellik-gorev-yonetimi]]
-    └── profile  → Profil
+    └── profile  → Profil                 ⚠️ hesap silme yok → [[yayin-engelleri]] E1
 ```
 
 ## UI bileşenleri (`components/ui/`)
 
-- Mevcut: `Button`, `TaskCard`, `EnergyBar`
-- Yeni (redesign): `GlassCard`, `GlowOrb`, `GradientButton` → [[durum-guncel]]
+- Temel: `Button`, `TaskCard`, `EnergyBar`, `Skeleton`, `EmptyState`, `Confetti`
+- Premium (cybermorphism): `GlassCard`, `GlowOrb`, `GradientButton`, `TaskCard`
+- Diğer: `TaskModal`, `DeleteConfirmModal`, `VoiceTaskButton` (mikrofon ikonu, metin girişi), `ErrorBoundary`, `ThemeProvider`
 
 ## Servis katmanı (`lib/`)
 

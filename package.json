@@ -9,7 +9,9 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "eslint .",
-    "test": "jest"
+    "test": "jest",
+    "legal:sync": "node scripts/sync-legal.js",
+    "legal:check": "node scripts/sync-legal.js --check"
   },
   "keywords": [
     "productivity",

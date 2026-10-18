@@ -12,6 +12,9 @@ services:
       - NODE_ENV=production
       - DATABASE_URL=postgresql://flowmind:securepassword@db:5432/flowmind
       - JWT_SECRET=${JWT_SECRET}
+      # AI features. Without this the /api/ai/chat proxy returns 503.
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - OPENROUTER_MODEL=${OPENROUTER_MODEL:-google/gemma-3-4b-it:free}
     depends_on:
       - db
     networks:

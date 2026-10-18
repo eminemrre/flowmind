@@ -2,15 +2,12 @@
 title: Gelişim Fazları — Zaman Çizelgesi
 type: zaman-cizelgesi
 tags: [flowmind, fazlar, history]
-updated: 2026-06-25
+updated: 2026-10-18
 ---
 
 # 🗺️ Gelişim Fazları (git history)
 
-İlgili: [[00-FlowMind-MOC]] · [[durum-guncel]] · [[karar-defteri]]
-
-> ⚠️ `ROADMAP.md` dosyası **eskimiş** (Faz 2'yi %0 gösteriyor). Gerçek ilerleme
-> git history'de. Bkz. [[karar-defteri]] → "Eskimiş dökümanlar".
+İlgili: [[00-FlowMind-MOC]] · [[durum-guncel]] · [[karar-defteri]] · [[yayin-engelleri]]
 
 ## Kronolojik zincir
 
@@ -22,14 +19,19 @@ updated: 2026-06-25
 5. **Faz 6.5** — İstatistik grafikleri, AI cache, ErrorBoundary, Skeleton → [[mimari-ai]]
 6. **Faz 7** — App Store lansman hazırlığı (icon, EAS, privacy, store desc)
 7. **Faz 8** — Background timer, offline mode, scheduled notifications → [[ozellik-enerji-ve-odak]]
-8. **Faz 9** — Sesli görev, takvim görünümü, tekrarlayan görevler → [[ozellik-ai-oneriler]]
+8. **Faz 9** — Doğal dille görev ekleme, takvim görünümü, tekrarlayan görevler → [[ozellik-ai-oneriler]]
 9. **Faz 10** — Enerji trend grafiği + authStore/gamificationStore testleri → [[ozellik-gamification]]
 10. **Altyapı** — Docker, winston logging, graceful shutdown; Expo SDK 54 yükseltme (RN 0.81, React 19, reanimated 4)
-11. **Submission** — EAS init, gerçek ikon, ascAppId pin, legal sayfalar → [[mimari-deployment]]
-12. **▶ ŞİMDİ** — Premium UI redesign (commit'lenmemiş) → [[durum-guncel]]
+11. **Submission hazırlığı** — EAS init, gerçek ikon, ascAppId pin, legal sayfalar → [[mimari-deployment]]
+12. **Premium UI** — cybermorphism tüm ekranlara, Girdap Küre ikonu, logo
+13. **Faz A** — AI çağrıları backend proxy'sine, bağımlılık temizliği (25 Haziran 2026)
+14. **🧊 Duraklama** — 25 Haziran → 18 Ekim 2026 (4 ay)
+15. **▶ ŞİMDİ** — Legal/doküman sağlamlaştırma + yayın engellerinin kapatılması → [[yayin-engelleri]]
 
 ## Teknik kilometre taşları
 
 - **Expo SDK 52 → 54** geçişi yapıldı (RN 0.76 → 0.81, React 18 → 19).
-  ⚠️ `README.md` hâlâ SDK 52 / RN 0.76 diyor → eskimiş, bkz. [[karar-defteri]].
+  README ve ROADMAP 2026-06-25'te güncellendi, artık doğru sürümleri yazıyor.
 - Recurring routes bir ara MVP dışı bırakıldı, sonra Faz 9'da geri geldi.
+- **Faz 9'daki "sesli görev" aslında ses değil**: mikrofon ikonlu bir metin girişi.
+  Gerçek konuşma tanıma hiç eklenmedi → [[yayin-engelleri]] E4.

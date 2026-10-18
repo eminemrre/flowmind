@@ -21,7 +21,7 @@ Bu, FlowMind'ın **çekirdek farkı**: görevleri düz bir listede değil, kişi
 
 ## Odak modu (Pomodoro+)
 
-- `app/(tabs)/focus.tsx` — ⚠️ şu an **redesign'da**, +488 satır → [[durum-guncel]]
+- `app/(tabs)/focus.tsx` — premium cybermorphism tasarımı tamamlandı (2026-06-25)
 - `routes/focus.js` + `focus_sessions` tablosu
 - **Background timer** (`lib/backgroundTimer.ts`) — uygulama arka plandayken sayar (Faz 8)
 - **Scheduled notifications** (`lib/notifications.ts` + `expo-notifications`) — mola/bitiş

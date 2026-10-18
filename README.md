@@ -93,18 +93,21 @@ cd flowmind
 npm install --legacy-peer-deps
 ```
 
-### 2) Configure environment
+### 2) Configure the app
 
 ```bash
 cp .env.example .env
 ```
 
-Required variables:
+The only required variable points the app at your backend:
 
 ```env
-EXPO_PUBLIC_OPENROUTER_API_KEY=your_key_here
 EXPO_PUBLIC_API_BASE_URL=http://your-server:3000/api
 ```
+
+> AI requests go through the backend, not the app. The OpenRouter key is a
+> **server-side secret** and must never be prefixed with `EXPO_PUBLIC_`
+> (anything with that prefix is embedded in the shipped app bundle).
 
 ### 3) Start the app
 
@@ -119,10 +122,20 @@ Use Expo Go on mobile or press `w` for web.
 ```bash
 cd backend
 npm install
+cp .env.example .env      # then fill in DATABASE_URL, JWT_SECRET, OPENROUTER_API_KEY
 createdb flowmind
 psql flowmind < config/schema.sql
 npm start
 ```
+
+`OPENROUTER_API_KEY` is required only for the AI features; without it the
+`/api/ai/chat` proxy returns 503 and the app falls back to static suggestions,
+while every other feature keeps working.
+
+Legal pages (`/privacy`, `/terms`, `/support`) are served by the backend, so
+their content lives in `backend/legal-content.js`. The `web/*.html` copies are
+generated from it — run `npm run legal:sync` after editing, and
+`npm run legal:check` (used in CI) to catch drift.
 
 ## Deployment Status
 
@@ -135,9 +148,10 @@ npm start
 
 ## Roadmap
 
-- Canonical roadmap: [ROADMAP.md](ROADMAP.md)
-- In progress: task sync hardening, daily planning algorithm improvements, push notifications
-- Planned: offline sync improvements, calendar integration, health platform integrations
+- Canonical roadmap: [ROADMAP.md](ROADMAP.md) · detailed working notes: [`docs/brain`](docs/brain/00-FlowMind-MOC.md)
+- In progress: App Store submission (screenshots, store metadata, production build)
+- Planned: in-app account deletion, real voice input for voice-to-task, offline sync improvements, calendar integration
+- Known gaps are tracked in [`docs/brain/sonraki-adimlar.md`](docs/brain/sonraki-adimlar.md)
 
 ## Contributing
 

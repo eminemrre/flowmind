@@ -2,27 +2,28 @@
 title: Mimari — Backend (Express + PostgreSQL)
 type: mimari
 tags: [flowmind, mimari, backend]
-updated: 2026-06-25
+updated: 2026-10-18
 ---
 
 # 🗄️ Backend — Express + PostgreSQL (VDS)
 
-İlgili: [[mimari-genel]] · [[mimari-deployment]] · [[karar-defteri]]
+İlgili: [[mimari-genel]] · [[mimari-deployment]] · [[mimari-ai]] · [[yayin-engelleri]]
 
 ## Stack
 
-- **Node.js + Express** (`backend/server.js`)
-- **PostgreSQL** (`backend/config/database.js`, `schema.sql`)
-- **JWT** auth (`backend/middleware/auth.js`) + istemcide `expo-secure-store`
-- **winston** structured logging (`backend/utils/logger.js`)
-- **Docker** (`Dockerfile`, `docker-compose.yml`) + PM2
-- Host: **VDS** (kendi sunucu) — `setup-vds.sh`
+- **Node.js + Express** (`backend/server.js`) — `helmet`, `cors`, JSON body limit 1 MB
+- **PostgreSQL** (`backend/config/database.js`, `config/schema.sql`)
+- **JWT** auth (`middleware/auth.js`) + istemcide `expo-secure-store`
+- **winston** logging (`utils/logger.js`) — konsol + `logs/all.log`, `logs/error.log`
+- **Docker** (`Dockerfile`, `docker-compose.yml`) ve VDS üzerinde PM2 (`setup-vds.sh`)
+- Rate limit: `/api` için IP başına 15 dakikada 100, `/api/auth` için 10 istek
+  (bellekte `Map` — restart'ta sıfırlanır, tek instance varsayımı)
 
 ## API rotaları (`backend/routes/`)
 
-| Rota | Sorumluluk | Bağlı özellik |
+| Rota | Sorumluluk | Bağlı |
 |---|---|---|
-| `auth.js` | register / login / me | [[mimari-state-zustand]] |
+| `auth.js` | register / login / me / profile / logout | [[mimari-state-zustand]] |
 | `tasks.js` | görev CRUD + complete | [[ozellik-gorev-yonetimi]] |
 | `recurring.js` | tekrarlayan görevler | [[ozellik-gorev-yonetimi]] |
 | `focus.js` | odak oturumları | [[ozellik-enerji-ve-odak]] |
@@ -30,18 +31,36 @@ updated: 2026-06-25
 | `stats.js` | istatistikler | [[ozellik-gamification]] |
 | `achievements.js` | rozetler | [[ozellik-gamification]] |
 | `preferences.js` | kullanıcı tercihleri | |
-| `legal.js` | /privacy /terms /support | [[mimari-deployment]] |
+| `ai.js` | OpenRouter proxy (`POST /chat`, auth korumalı) | [[mimari-ai]] |
+| `legal.js` | `/privacy`, `/terms`, `/support` (içerik `backend/legal-content.js`) | [[yayin-engelleri]] |
+
+⚠️ **Eksik rota:** `DELETE /auth/account` yok. Apple uygulama içinden hesap silme
+ister → [[yayin-engelleri]] E1. Şemadaki `ON DELETE CASCADE` sayesinde tek bir
+`DELETE FROM users WHERE id=$1` yeterli olacak.
 
 ## DB şeması (`config/schema.sql`)
 
 `users`, `tasks`, `focus_sessions`, `energy_logs`, `achievements`, `subscriptions`
 
+- `subscriptions` tablosu var ama **hiçbir rota onu okumuyor/yazmıyor** — şu an ölü.
+  Uygulamada uygulama içi satın alma ya da abonelik yok.
+- `constants/config.ts` içindeki `freeTier` limitleri (10 görev/gün, 5 AI isteği/gün)
+  tanımlı ama **hiçbir yerde uygulanmıyor** — kullanılmıyorsa kaldırılmalı.
+
 ## Test
 
-`backend/__tests__/` → auth, tasks, achievements, simple (Jest)
+`backend/__tests__/` → auth, tasks, achievements, simple (Jest + supertest).
+PostgreSQL gerektirir; `npm test` backend dizininde çalışır.
 
-## Bağlantı
+## Yerel çalıştırma
 
-İstemci `lib/api.ts` → `config.api.baseUrl` üzerinden REST. Bearer JWT.
-> ⚠️ Ayrıca `@supabase/supabase-js` bağımlılığı var ama bu backend Express.
-> Çift backend mi, ölü bağımlılık mı? → [[karar-defteri]]
+```bash
+cd backend && npm install
+cp .env.example .env      # DATABASE_URL, JWT_SECRET, OPENROUTER_API_KEY
+createdb flowmind && psql flowmind < config/schema.sql
+npm start                 # http://localhost:3000
+```
+
+Sağlık kontrolü: `GET /api/health` → `{"status":"ok"}`. Legal sayfalar DB
+gerektirmez; sunucu veritabanı olmadan da ayağa kalkar ve `/privacy` döner
+(2026-10-18'de doğrulandı).
